@@ -24,7 +24,7 @@
       "net.modfest.ballotbox.BallotBox"
     ],
     "client": [
-      "net.modfest.ballotbox.BallotBoxClient"
+      "net.modfest.ballotbox.client.NotBallotBoxClient"
     ]
   },
   "depends": {
