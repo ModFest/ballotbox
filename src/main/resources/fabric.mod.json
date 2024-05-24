@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "id": "ballotbox",
+  "version": "${version}",
+  "name": "Ballotbox",
+  "description": "Vote on ModFest submissions in-game",
+  "authors": [
+    "ModFest"
+  ],
+  "contributors": [
+    "Prospector",
+    "Sisby folk",
+    "Acikek"
+  ],
+  "contact": {
+    "homepage": "https://modrinth.com/mod/ballotbox",
+    "issues": "https://github.com/modfest/ballotbox/issues",
+    "sources": "https://github.com/modfest/ballotbox"
+  },
+  "icon": "assets/ballotbox/icon.png",
+  "license": "MIT",
+  "entrypoints": {
+    "main": [
+      "net.modfest.ballotbox.BallotBox"
+    ],
+    "client": [
+      "net.modfest.ballotbox.BallotBoxClient"
+    ]
+  },
+  "depends": {
+    "minecraft": ">=${mc}",
+    "fabricloader": ">=${fl}",
+    "fabric-api": ">=${fapi}",
+    "spruceui": ">=${spruceui}"
+  }
+}

@@ -1,0 +1,22 @@
+[versions]
+loom = "1.6.+"
+githubRelease = "2.5.2"
+minotaur = "2.8.7"
+
+mc = "1.20.6"
+fl = "0.15.11"
+qm = "1.20.6+build.6"
+fapi = "0.99.0+1.20.6"
+spruceui = "5.0.3+1.20.6"
+
+[plugins]
+loom = { id = "fabric-loom", version.ref = "loom" }
+githubRelease = { id = "com.github.breadmoirai.github-release", version.ref = "githubRelease" }
+minotaur = { id = "com.modrinth.minotaur", version.ref = "minotaur" }
+
+[libraries]
+mc = { group = "mojang", name = "minecraft", version.ref = "mc" }
+fl = { group = "net.fabricmc", name = "fabric-loader", version.ref = "fl" }
+qm = { group = "org.quiltmc", name = "quilt-mappings", version.ref = "qm" }
+fapi = { group = "net.fabricmc.fabric-api", name = "fabric-api", version.ref = "fapi" }
+spruceui = { group = "dev.lambdaurora", name = "spruceui", version.ref = "spruceui" }
