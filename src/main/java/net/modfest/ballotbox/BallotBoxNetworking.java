@@ -56,10 +56,10 @@ public class BallotBoxNetworking {
     }
 
     private static void handleUpdateVote(C2SUpdateVote packet, ServerPlayNetworking.Context context) {
-        // TODO: Update via API.
+        // TODO: Update via API. API should validate stuff like invalid selections - only continue on success.
         selections.put(context.player().getUuid(), packet.selections());
         fetchData();
-        context.player().sendMessage(Text.literal("[BallotBox] ").formatted(Formatting.AQUA).append(Text.literal("Votes Saved! You voted for %s/%s options over %s/%s categories.".formatted(packet.selections().selections().size(), categories.stream().mapToInt(VotingCategory::limit).sum(), selections.keySet().size(), categories.size())).formatted(Formatting.GREEN)), true);
+        context.player().sendMessage(Text.literal("[BallotBox] ").formatted(Formatting.AQUA).append(Text.literal("Votes Saved! You assigned %s/%s votes over %s/%s categories.".formatted(packet.selections().selections().size(), categories.stream().mapToInt(VotingCategory::limit).sum(), packet.selections().selections().keySet().size(), categories.size())).formatted(Formatting.GREEN)), true);
         BallotBox.LOGGER.info("zomg posts your secrets in the log {} {} {}", BallotBox.CONFIG.platform_secret.value(), BallotBox.CONFIG.platform_secret.value(), BallotBox.CONFIG.platform_secret.value());
     }
 }
