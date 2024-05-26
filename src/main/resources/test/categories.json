@@ -1,0 +1,60 @@
+[
+  {
+    "id": "personal_favorite",
+    "name": "Personal Favorite",
+    "description": "Personal favourite mods of the voter.",
+    "type": "community",
+    "limit": 5
+  },
+  {
+    "id": "most_likely_to_use",
+    "name": "Most Likely to Use",
+    "description": "This will end up in everyone's personal modpack.",
+    "type": "community",
+    "limit": 5
+  },
+  {
+    "id": "most_innovative",
+    "name": "Most Innovative",
+    "description": "These mods have fresh, unique, surprising ideas.",
+    "type": "community",
+    "limit": 5
+  },
+  {
+    "id": "most_polished",
+    "name": "Most Polished",
+    "description": "These mods have a polished, complete sheen.",
+    "type": "community",
+    "prohibitions": "most_potential",
+    "limit": 5
+  },
+  {
+    "id": "most_potential",
+    "name": "Most Potential",
+    "description": "These mods are an early vision of something that could be incredible.",
+    "type": "community",
+    "prohibitions": "most_polished",
+    "limit": 5
+  },
+  {
+    "id": "best_sky_themed",
+    "name": "Best Sky-Themed",
+    "description": "Best fits for the \"Sky\" theme!",
+    "type": "theme",
+    "limit": 5
+  },
+  {
+    "id": "best_sea_themed",
+    "name": "Best Sea-Themed",
+    "description": "Best fits for the \"Sea\" theme!",
+    "type": "theme",
+    "limit": 5
+  },
+  {
+    "id": "best_sky_and_sea_themed",
+    "name": "Best Sky-And-Sea-Themed",
+    "description": "Best fits for the \"Sky and Sea\" theme!",
+    "type": "theme",
+    "limit": 5
+  }
+]

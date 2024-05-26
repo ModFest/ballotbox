@@ -7,6 +7,7 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.widget.button.ButtonWidget;
 import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
 import net.modfest.ballotbox.client.packet.C2SUpdateVote;
 import net.modfest.ballotbox.data.VotingCategory;
 import net.modfest.ballotbox.data.VotingOption;
@@ -18,6 +19,9 @@ import java.util.List;
 
 public class VotingScreen extends SpruceScreen {
     public static final Text TITLE = Text.literal("Modfest Voting");
+    public static final Identifier LOCKUP_TEXTURE = new Identifier("modfest", "textures/art/graphics/lockup-transparent.png");
+    public static final int LOCKUP_TEXTURE_WIDTH = 141;
+    public static final int LOCKUP_TEXTURE_HEIGHT = 32;
     protected final Multimap<String, String> previousSelections = HashMultimap.create();
     protected final Multimap<String, String> selections = HashMultimap.create();
     protected List<VotingCategory> categories = new ArrayList<>();
