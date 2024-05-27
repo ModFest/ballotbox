@@ -2,28 +2,28 @@
   {
     "id": "personal_favorite",
     "name": "Personal Favorite",
-    "description": "Personal favourite mods of the voter.",
+    "description": "Personally favoured mods.",
     "type": "community",
     "limit": 5
   },
   {
     "id": "most_likely_to_use",
     "name": "Most Likely to Use",
-    "description": "This will end up in everyone's personal modpack.",
+    "description": "Mods that'll end up in everyone's personal modpack.",
     "type": "community",
     "limit": 5
   },
   {
     "id": "most_innovative",
     "name": "Most Innovative",
-    "description": "These mods have fresh, unique, surprising ideas.",
+    "description": "Mods with fresh, unique, surprising ideas.",
     "type": "community",
     "limit": 5
   },
   {
     "id": "most_polished",
     "name": "Most Polished",
-    "description": "These mods have a polished, complete sheen.",
+    "description": "Mods with a polished, complete sheen.",
     "type": "community",
     "prohibitions": [
       "most_potential"
@@ -33,7 +33,7 @@
   {
     "id": "most_potential",
     "name": "Most Potential",
-    "description": "These mods are an early vision of something that could be incredible.",
+    "description": "An early vision of something incredible.",
     "type": "community",
     "prohibitions": [
       "most_polished"
