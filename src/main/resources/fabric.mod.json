@@ -10,7 +10,7 @@
   "contributors": [
     "Prospector",
     "Sisby folk",
-    "Acikek"
+    "acikek"
   ],
   "contact": {
     "homepage": "https://modrinth.com/mod/ballotbox",
@@ -32,5 +32,8 @@
     "fabricloader": ">=${fl}",
     "fabric-api": ">=${fapi}",
     "spruceui": ">=${spruceui}"
-  }
+  },
+  "mixins": [
+    "ballotbox.mixins.json"
+  ]
 }
