@@ -32,5 +32,8 @@
     "fabricloader": ">=${fl}",
     "fabric-api": ">=${fapi}",
     "spruceui": ">=${spruceui}"
-  }
+  },
+  "mixins": [
+    "ballotbox.mixins.json"
+  ]
 }
