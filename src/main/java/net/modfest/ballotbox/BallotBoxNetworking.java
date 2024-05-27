@@ -46,6 +46,10 @@ public class BallotBoxNetworking {
 
     public static void sendVoteScreenData(ServerPlayerEntity player) {
         // TODO: Fetch from API.
+        try { // Simulate request lag
+            Thread.sleep(500);
+        } catch (Exception ignored2) {
+        }
         fetchData();
         selections.computeIfAbsent(player.getUuid(), uuid -> VotingSelections.CODEC.decode(JsonOps.INSTANCE, gson.fromJson(new BufferedReader(new InputStreamReader(ClassLoaderUtil.getClassLoader(BallotBoxNetworking.class).getResourceAsStream("test/selections.json"))), JsonObject.class)).getOrThrow().getFirst());
         ServerPlayNetworking.send(player, new S2CVoteScreenData(categories, options, selections.get(player.getUuid())));
