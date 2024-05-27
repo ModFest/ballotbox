@@ -46,7 +46,6 @@ public class VotingScreen extends SpruceScreen {
     protected List<VotingOption> options = new ArrayList<>();
     protected boolean loaded = false;
 
-    protected int lockupWidth, lockupHeight;
     protected int sidePanelWidth;
     protected int sidePanelVerticalPadding;
     protected Map<String, CategoryContainerWidget> categoryWidgets = new HashMap<>();
@@ -65,7 +64,6 @@ public class VotingScreen extends SpruceScreen {
 
     protected void initLoaded() {
         initSidePanel();
-        initLockup();
     }
 
     protected void addCategoryTab(SpruceTabbedWidget tabs, VotingCategory category) {
@@ -92,21 +90,6 @@ public class VotingScreen extends SpruceScreen {
         addDrawableSelectableElement(tabs);
     }
 
-    protected void initLockup() {
-        int boundsWidth = sidePanelWidth - 8;
-        int boundsHeight = sidePanelVerticalPadding - 8;
-        double widthRatio = (double) boundsWidth / LOCKUP_TEXTURE_WIDTH;
-        double heightRatio = (double) boundsHeight / LOCKUP_TEXTURE_HEIGHT;
-        if (widthRatio <= heightRatio) {
-            lockupWidth = boundsWidth;
-            lockupHeight = (int) (boundsWidth * ((double) LOCKUP_TEXTURE_HEIGHT / LOCKUP_TEXTURE_WIDTH));
-        }
-        else {
-            lockupWidth = (int) (boundsHeight * ((double) LOCKUP_TEXTURE_WIDTH / LOCKUP_TEXTURE_HEIGHT));
-            lockupHeight = boundsHeight;
-        }
-    }
-
     @Override
     public void renderBackground(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
         super.renderBackground(graphics, mouseX, mouseY, delta);
@@ -117,7 +100,8 @@ public class VotingScreen extends SpruceScreen {
 
     public void renderLockup(GuiGraphics graphics) {
         RenderSystem.enableBlend();
-        graphics.drawTexture(LOCKUP_TEXTURE, (sidePanelWidth - lockupWidth) / 2, (sidePanelVerticalPadding - lockupHeight) / 2, 0, 0, lockupWidth, lockupHeight, lockupWidth, lockupHeight);
+        int drawHeight = sidePanelWidth * LOCKUP_TEXTURE_HEIGHT / LOCKUP_TEXTURE_WIDTH;
+        graphics.drawTexture(LOCKUP_TEXTURE, 0, (sidePanelVerticalPadding - drawHeight) / 2, sidePanelWidth, drawHeight, 0, 0, LOCKUP_TEXTURE_WIDTH, LOCKUP_TEXTURE_HEIGHT, LOCKUP_TEXTURE_WIDTH, LOCKUP_TEXTURE_HEIGHT);
         RenderSystem.disableBlend();
     }
 
@@ -237,7 +221,7 @@ public class VotingScreen extends SpruceScreen {
 
         public Map<String, VotingOptionButtonWidget> buttons = new HashMap<>();
         public Text titleText;
-        public boolean atLimit;
+        public boolean atLimit = false;
 
         public CategoryContainerWidget(Position position, int width, int height, VotingCategory category) {
             super(position, width, height);
@@ -246,7 +230,6 @@ public class VotingScreen extends SpruceScreen {
         }
 
         public void init() {
-            updateSelections();
             List<String> prohibitedIds = new ArrayList<>();
             category.prohibitions().ifPresent(prohibitions -> prohibitions.forEach(prohibition -> {
                 prohibitedIds.addAll(selections.get(prohibition));
@@ -269,6 +252,8 @@ public class VotingScreen extends SpruceScreen {
                 optionList.setRenderTransition(false);
                 widgetAdder.accept(optionList);
             });
+            updateSelections();
+            updateProhibitions();
         }
 
         public void updateSelections() {
@@ -280,6 +265,16 @@ public class VotingScreen extends SpruceScreen {
                 for (var entry : buttons.entrySet()) {
                     if (!entry.getValue().selected && !entry.getValue().prohibited) {
                         entry.getValue().setActive(!atLimit);
+                    }
+                }
+            }
+        }
+
+        public void updateProhibitions() {
+            for (VotingCategory category : categories) {
+                if (category.prohibitions().isPresent() && category.prohibitions().get().contains(category.id())) {
+                    for (String option : selections.get(category.id())) {
+                        buttons.get(option).setActive(false);
                     }
                 }
             }
