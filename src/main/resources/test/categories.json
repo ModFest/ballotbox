@@ -25,7 +25,9 @@
     "name": "Most Polished",
     "description": "These mods have a polished, complete sheen.",
     "type": "community",
-    "prohibitions": "most_potential",
+    "prohibitions": [
+      "most_potential"
+    ],
     "limit": 5
   },
   {
@@ -33,7 +35,9 @@
     "name": "Most Potential",
     "description": "These mods are an early vision of something that could be incredible.",
     "type": "community",
-    "prohibitions": "most_polished",
+    "prohibitions": [
+      "most_polished"
+    ],
     "limit": 5
   },
   {
@@ -52,7 +56,7 @@
   },
   {
     "id": "best_sky_and_sea_themed",
-    "name": "Best Sky-And-Sea-Themed",
+    "name": "Best Sky-and-Sea Themed",
     "description": "Best fits for the \"Sky and Sea\" theme!",
     "type": "theme",
     "limit": 5
