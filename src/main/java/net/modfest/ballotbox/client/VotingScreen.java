@@ -25,15 +25,23 @@ import net.modfest.ballotbox.data.VotingOption;
 import net.modfest.ballotbox.data.VotingSelections;
 import net.modfest.ballotbox.mixin.client.OptionEntryAccessor;
 import net.modfest.ballotbox.packet.S2CVoteScreenData;
+import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class VotingScreen extends SpruceScreen {
     public static final Text TITLE = Text.literal("ModFest Voting");
     public static final Text LOADING_INDICATOR = Text.literal("Loading...");
+    public static final List<String> CATEGORY_TYPES = List.of(
+        "theme",
+        "community"
+    );
 
     // FIXME: Placeholder
     public static final Identifier LOCKUP_TEXTURE = new Identifier("modfest", "textures/art/graphics/lockup-transparent.png");
@@ -76,16 +84,13 @@ public class VotingScreen extends SpruceScreen {
 
     protected void initSidePanel() {
         sidePanelWidth = (int) (width / 3.5);
-        sidePanelVerticalPadding = (int) (height / 5.0);
+        sidePanelVerticalPadding = (int) (height / 5.5);
         var tabs = new SpruceTabbedWidget(Position.of(this, 0, sidePanelVerticalPadding), width, height - sidePanelVerticalPadding, null, (int) (width / 3.5), 0);
-        // TODO: Clean up!
-        for (var themeCategory : categories.stream().filter(cat -> cat.type().equals("theme")).toList()) {
-            addCategoryTab(tabs, themeCategory);
-        }
-        tabs.addSeparatorEntry(null);
-        for (var communityCategory : categories.stream().filter(cat -> cat.type().equals("community")).toList()) {
-            addCategoryTab(tabs, communityCategory);
-        }
+        Map<String, List<VotingCategory>> typedCategories = categories.stream().collect(Collectors.groupingBy(VotingCategory::type));
+        typedCategories.entrySet().stream().sorted(Comparator.comparing(e -> CATEGORY_TYPES.contains(e.getKey()) ? CATEGORY_TYPES.indexOf(e.getKey()) : 99)).forEach(e -> {
+            e.getValue().forEach(category -> addCategoryTab(tabs, category));
+            if (tabs.getList().children().size() < categories.size() + typedCategories.keySet().size() - 1) tabs.addSeparatorEntry(null);
+        });
         tabs.getList().setBackground(EmptyBackground.EMPTY_BACKGROUND);
         addDrawableSelectableElement(tabs);
     }
@@ -148,6 +153,7 @@ public class VotingScreen extends SpruceScreen {
         public final CategoryContainerWidget parent;
         public boolean selected;
         public boolean prohibited;
+        public String url;
 
         public VotingOptionButtonWidget(Position position, int width, int height, VotingCategory category, VotingOption option, CategoryContainerWidget parent, boolean prohibited) {
             super(position, width, height, Text.literal(option.name()), button -> {
@@ -167,9 +173,27 @@ public class VotingScreen extends SpruceScreen {
             this.parent = parent;
             selected = selections.containsEntry(category.id(), option.id());
             this.prohibited = prohibited;
-            if (prohibited && isActive()) {
-                setActive(false);
+            if (option.type().equals("modrinth")) url = "https://modrinth.com/mod/%s".formatted(option.id()); // Use project ID later
+            setTooltip(url == null ? Text.literal(option.description()).formatted(Formatting.GRAY) : Text.literal(option.description()).formatted(Formatting.GRAY).append(Text.literal("\n")).append(Text.literal("Right-Click").formatted(Formatting.GOLD)).append(Text.literal(" to open the mod page.").formatted(Formatting.WHITE)));
+        }
+
+        @Override
+        public boolean isActive() {
+            return !prohibited && super.isActive();
+        }
+
+        @Override
+        public Optional<Text> getTooltip() {
+            return isActive() ? super.getTooltip() : prohibited ? Optional.of(Text.literal("Prohibited by another category!").formatted(Formatting.GRAY)) : Optional.of(Text.literal("You've reached the category vote limit!").formatted(Formatting.GRAY));
+        }
+
+        @Override
+        protected boolean onMouseClick(double mouseX, double mouseY, int button) {
+            if (button == GLFW.GLFW_MOUSE_BUTTON_2 && url != null) {
+                Util.getOperatingSystem().open(url); // confirmation screen causes save
+                return true;
             }
+            return super.onMouseClick(mouseX, mouseY, button);
         }
 
         @Override
@@ -221,7 +245,6 @@ public class VotingScreen extends SpruceScreen {
 
         public Map<String, VotingOptionButtonWidget> buttons = new HashMap<>();
         public Text titleText;
-        public boolean atLimit = false;
 
         public CategoryContainerWidget(Position position, int width, int height, VotingCategory category) {
             super(position, width, height);
@@ -231,9 +254,7 @@ public class VotingScreen extends SpruceScreen {
 
         public void init() {
             List<String> prohibitedIds = new ArrayList<>();
-            category.prohibitions().ifPresent(prohibitions -> prohibitions.forEach(prohibition -> {
-                prohibitedIds.addAll(selections.get(prohibition));
-            }));
+            category.prohibitions().ifPresent(prohibitions -> prohibitions.forEach(prohibition -> prohibitedIds.addAll(selections.get(prohibition))));
             addChildren((containerWidth, containerHeight, widgetAdder) -> {
                 var optionList = new SpruceOptionListWidget(Position.of(this, 1, 0), containerWidth, containerHeight);
                 for (var optionPairs : Lists.partition(options, 2)) {
@@ -253,37 +274,19 @@ public class VotingScreen extends SpruceScreen {
                 widgetAdder.accept(optionList);
             });
             updateSelections();
-            updateProhibitions();
         }
 
         public void updateSelections() {
-            boolean wasAtLimit = atLimit;
             int selected = selections.get(category.id()).size();
-            atLimit = selected >= category.limit();
+            boolean atLimit = selected >= category.limit();
             titleText = Text.literal(category.name()).append(Text.literal(" (" + selected + "/" + category.limit() + ")").formatted(atLimit ? Formatting.GREEN : Formatting.GRAY));
-            if (atLimit != wasAtLimit) {
-                for (var entry : buttons.entrySet()) {
-                    if (!entry.getValue().selected && !entry.getValue().prohibited) {
-                        entry.getValue().setActive(!atLimit);
-                    }
-                }
-            }
-        }
-
-        public void updateProhibitions() {
-            for (VotingCategory category : categories) {
-                if (category.prohibitions().isPresent() && category.prohibitions().get().contains(category.id())) {
-                    for (String option : selections.get(category.id())) {
-                        buttons.get(option).setActive(false);
-                    }
-                }
-            }
+            buttons.forEach((id, button) -> button.setActive(button.selected || !atLimit));
         }
 
         public void updateProhibitions(String optionId, boolean selected) {
             category.prohibitions().ifPresent(prohibitions -> {
                 for (var prohibition : prohibitions) {
-                    categoryWidgets.get(prohibition).buttons.get(optionId).setActive(!selected);
+                    categoryWidgets.get(prohibition).buttons.get(optionId).prohibited = selected;
                 }
             });
         }

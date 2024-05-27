@@ -46,10 +46,6 @@ public class BallotBoxCommands {
 
     private static int vote(ServerPlayerEntity player, String ignored, Consumer<Text> feedback) {
         ServerPlayNetworking.send(player, new OpenVoteScreenPacket());
-        try { // Simulate request lag for the command version
-            Thread.sleep(500);
-        } catch (Exception ignored2) {
-        }
         BallotBoxNetworking.sendVoteScreenData(player);
         return 1;
     }
