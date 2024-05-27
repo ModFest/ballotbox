@@ -4,6 +4,7 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.texture.NativeImage;
 import dev.lambdaurora.spruceui.Position;
 import dev.lambdaurora.spruceui.background.EmptyBackground;
 import dev.lambdaurora.spruceui.screen.SpruceScreen;
@@ -12,7 +13,9 @@ import dev.lambdaurora.spruceui.widget.container.SpruceContainerWidget;
 import dev.lambdaurora.spruceui.widget.container.SpruceOptionListWidget;
 import dev.lambdaurora.spruceui.widget.container.tabbed.SpruceTabbedWidget;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.texture.NativeImageBackedTexture;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
@@ -27,6 +30,9 @@ import net.modfest.ballotbox.mixin.client.OptionEntryAccessor;
 import net.modfest.ballotbox.packet.S2CVoteScreenData;
 import org.lwjgl.glfw.GLFW;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -154,6 +160,7 @@ public class VotingScreen extends SpruceScreen {
         public boolean selected;
         public boolean prohibited;
         public String url;
+        Identifier texture = null;
 
         public VotingOptionButtonWidget(Position position, int width, int height, VotingCategory category, VotingOption option, CategoryContainerWidget parent, boolean prohibited) {
             super(position, width, height, Text.literal(option.name()), button -> {
@@ -161,8 +168,7 @@ public class VotingScreen extends SpruceScreen {
                     if (selections.containsEntry(category.id(), option.id())) {
                         selections.remove(category.id(), option.id());
                         votingButton.selected = false;
-                    }
-                    else {
+                    } else {
                         selections.put(category.id(), option.id());
                         votingButton.selected = true;
                     }
@@ -173,6 +179,15 @@ public class VotingScreen extends SpruceScreen {
             this.parent = parent;
             selected = selections.containsEntry(category.id(), option.id());
             this.prohibited = prohibited;
+            FabricLoader.getInstance().getModContainer(option.id()).ifPresent(mod -> {
+                mod.getMetadata().getIconPath(16).ifPresent(iconPath -> mod.findPath(iconPath).ifPresent(path -> {
+                    try (InputStream inputStream = Files.newInputStream(path)) {
+                        texture = new Identifier(BallotBox.ID, mod.getMetadata().getId() + "_icon");
+                        this.client.getTextureManager().registerTexture(texture, new NativeImageBackedTexture(NativeImage.read(inputStream)));
+                    } catch (IOException ignored) {
+                    }
+                }));
+            });
             if (option.type().equals("modrinth")) url = "https://modrinth.com/mod/%s".formatted(option.id()); // Use project ID later
             setTooltip(url == null ? Text.literal(option.description()).formatted(Formatting.GRAY) : Text.literal(option.description()).formatted(Formatting.GRAY).append(Text.literal("\n")).append(Text.literal("Right-Click").formatted(Formatting.GOLD)).append(Text.literal(" to open the mod page.").formatted(Formatting.WHITE)));
         }
@@ -210,6 +225,9 @@ public class VotingScreen extends SpruceScreen {
             int left = getX() + 2, right = getX() + getWidth() - 2;
             int bottom = getY() + getHeight();
             int textY = (getY() * 2 + getHeight() - 9) / 2 + 1;
+            if (texture != null) {
+                graphics.drawTexture(texture, left, getY() + 2, 16, 16, 0, 0, 16, 16, 16, 16);
+            }
             if (textWidth <= getWidth()) {
                 graphics.drawCenteredShadowedText(client.textRenderer, getMessage(), left + getWidth() / 2, textY, 0xFFFFFFFF);
                 return;
@@ -220,7 +238,7 @@ public class VotingScreen extends SpruceScreen {
             double scroll = Math.sin((Math.PI / 2.0) * Math.cos((Math.PI * 2) * seconds / clampedWidth)) / 2.0 + 0.5;
             double offset = MathHelper.lerp(scroll, 0.0, extraWidth);
             graphics.enableScissor(left, Math.max(getY(), parent.getY()), right, bottom);
-            graphics.drawShadowedText(client.textRenderer, getMessage(), left - (int)offset, textY, 0xFFFFFFFF);
+            graphics.drawShadowedText(client.textRenderer, getMessage(), left - (int) offset, textY, 0xFFFFFFFF);
             graphics.disableScissor();
         }
 
