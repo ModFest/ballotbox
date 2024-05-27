@@ -13,7 +13,6 @@ import dev.lambdaurora.spruceui.widget.container.SpruceOptionListWidget;
 import dev.lambdaurora.spruceui.widget.container.tabbed.SpruceTabbedWidget;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.screen.ConfirmLinkScreen;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
@@ -85,7 +84,7 @@ public class VotingScreen extends SpruceScreen {
 
     protected void initSidePanel() {
         sidePanelWidth = (int) (width / 3.5);
-        sidePanelVerticalPadding = (int) (height / 6.0);
+        sidePanelVerticalPadding = (int) (height / 5.5);
         var tabs = new SpruceTabbedWidget(Position.of(this, 0, sidePanelVerticalPadding), width, height - sidePanelVerticalPadding, null, (int) (width / 3.5), 0);
         Map<String, List<VotingCategory>> typedCategories = categories.stream().collect(Collectors.groupingBy(VotingCategory::type));
         typedCategories.entrySet().stream().sorted(Comparator.comparing(e -> CATEGORY_TYPES.contains(e.getKey()) ? CATEGORY_TYPES.indexOf(e.getKey()) : 99)).forEach(e -> {
@@ -185,13 +184,13 @@ public class VotingScreen extends SpruceScreen {
 
         @Override
         public Optional<Text> getTooltip() {
-            return isActive() ? super.getTooltip() : prohibited ? Optional.of(Text.literal("Prohibited by another category!").formatted(Formatting.GRAY)) : Optional.of(Text.literal("Prohibited by the vote limit!").formatted(Formatting.GRAY));
+            return isActive() ? super.getTooltip() : prohibited ? Optional.of(Text.literal("Prohibited by another category!").formatted(Formatting.GRAY)) : Optional.of(Text.literal("You've reached the category vote limit!").formatted(Formatting.GRAY));
         }
 
         @Override
         protected boolean onMouseClick(double mouseX, double mouseY, int button) {
             if (button == GLFW.GLFW_MOUSE_BUTTON_2 && url != null) {
-                ConfirmLinkScreen.create(VotingScreen.this, url);
+                Util.getOperatingSystem().open(url); // confirmation screen causes save
                 return true;
             }
             return super.onMouseClick(mouseX, mouseY, button);
