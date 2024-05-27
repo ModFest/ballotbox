@@ -13,6 +13,7 @@ import dev.lambdaurora.spruceui.widget.container.SpruceOptionListWidget;
 import dev.lambdaurora.spruceui.widget.container.tabbed.SpruceTabbedWidget;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.screen.ConfirmLinkScreen;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
@@ -25,12 +26,14 @@ import net.modfest.ballotbox.data.VotingOption;
 import net.modfest.ballotbox.data.VotingSelections;
 import net.modfest.ballotbox.mixin.client.OptionEntryAccessor;
 import net.modfest.ballotbox.packet.S2CVoteScreenData;
+import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class VotingScreen extends SpruceScreen {
@@ -151,6 +154,7 @@ public class VotingScreen extends SpruceScreen {
         public final CategoryContainerWidget parent;
         public boolean selected;
         public boolean prohibited;
+        public String url;
 
         public VotingOptionButtonWidget(Position position, int width, int height, VotingCategory category, VotingOption option, CategoryContainerWidget parent, boolean prohibited) {
             super(position, width, height, Text.literal(option.name()), button -> {
@@ -170,11 +174,27 @@ public class VotingScreen extends SpruceScreen {
             this.parent = parent;
             selected = selections.containsEntry(category.id(), option.id());
             this.prohibited = prohibited;
+            if (option.type().equals("modrinth")) url = "https://modrinth.com/mod/%s".formatted(option.id()); // Use project ID later
+            setTooltip(url == null ? Text.literal(option.description()).formatted(Formatting.GRAY) : Text.literal(option.description()).formatted(Formatting.GRAY).append(Text.literal("\n")).append(Text.literal("Right-Click").formatted(Formatting.GOLD)).append(Text.literal(" to open the mod page.").formatted(Formatting.WHITE)));
         }
 
         @Override
         public boolean isActive() {
             return !prohibited && super.isActive();
+        }
+
+        @Override
+        public Optional<Text> getTooltip() {
+            return isActive() ? super.getTooltip() : prohibited ? Optional.of(Text.literal("Prohibited by another category!").formatted(Formatting.GRAY)) : Optional.of(Text.literal("Prohibited by the vote limit!").formatted(Formatting.GRAY));
+        }
+
+        @Override
+        protected boolean onMouseClick(double mouseX, double mouseY, int button) {
+            if (button == GLFW.GLFW_MOUSE_BUTTON_2 && url != null) {
+                ConfirmLinkScreen.create(VotingScreen.this, url);
+                return true;
+            }
+            return super.onMouseClick(mouseX, mouseY, button);
         }
 
         @Override
