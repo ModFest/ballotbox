@@ -7,7 +7,7 @@ import net.minecraft.util.Identifier;
 import net.modfest.ballotbox.BallotBox;
 
 public record OpenVoteScreenPacket() implements CustomPayload {
-    public static final Id<OpenVoteScreenPacket> ID = new Id<>(new Identifier(BallotBox.ID, "open_vote_screen"));
+    public static final Id<OpenVoteScreenPacket> ID = new Id<>(Identifier.method_60655(BallotBox.ID, "open_vote_screen"));
     public static final PacketCodec<RegistryByteBuf, OpenVoteScreenPacket> CODEC = PacketCodec.unit(new OpenVoteScreenPacket());
 
     @Override

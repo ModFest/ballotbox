@@ -3,11 +3,11 @@ loom = "1.6.+"
 githubRelease = "2.5.2"
 minotaur = "2.8.7"
 
-mc = "1.20.6"
+mc = "1.21-pre1"
 fl = "0.15.11"
-qm = "1.20.6+build.6"
-fapi = "0.99.0+1.20.6"
-spruceui = "6.0.0+1.20.6"
+qm = "1.21-pre1+build.1"
+fapi = "0.99.4+1.21"
+spruceui = "6.0.0+1.21-pre1"
 kaleidoConfig = "0.3.1+1.3.1"
 
 [plugins]

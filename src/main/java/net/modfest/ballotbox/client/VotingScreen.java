@@ -50,7 +50,7 @@ public class VotingScreen extends SpruceScreen {
     );
 
     // FIXME: Placeholder
-    public static final Identifier LOCKUP_TEXTURE = new Identifier("modfest", "textures/art/graphics/lockup-transparent.png");
+    public static final Identifier LOCKUP_TEXTURE = Identifier.method_60655("modfest", "textures/art/graphics/lockup-transparent.png");
     public static final int LOCKUP_TEXTURE_WIDTH = 1129; //141;
     public static final int LOCKUP_TEXTURE_HEIGHT = 256; //32;
 
@@ -153,8 +153,8 @@ public class VotingScreen extends SpruceScreen {
     }
 
     public class VotingOptionButtonWidget extends SpruceButtonWidget {
-        public static final Identifier VOTED_TEXTURE = new Identifier(BallotBox.ID, "button_voted");
-        public static final Identifier CHECKMARK_TEXTURE = new Identifier(BallotBox.ID, "textures/gui/button_checkmark.png");
+        public static final Identifier VOTED_TEXTURE = Identifier.method_60655(BallotBox.ID, "button_voted");
+        public static final Identifier CHECKMARK_TEXTURE = Identifier.method_60655(BallotBox.ID, "textures/gui/button_checkmark.png");
 
         public final CategoryContainerWidget parent;
         public boolean selected;
@@ -182,7 +182,7 @@ public class VotingScreen extends SpruceScreen {
             FabricLoader.getInstance().getModContainer(option.id()).ifPresent(mod -> {
                 mod.getMetadata().getIconPath(16).ifPresent(iconPath -> mod.findPath(iconPath).ifPresent(path -> {
                     try (InputStream inputStream = Files.newInputStream(path)) {
-                        texture = new Identifier(BallotBox.ID, mod.getMetadata().getId() + "_icon");
+                        texture = Identifier.method_60655(BallotBox.ID, mod.getMetadata().getId() + "_icon");
                         this.client.getTextureManager().registerTexture(texture, new NativeImageBackedTexture(NativeImage.read(inputStream)));
                     } catch (IOException ignored) {
                     }

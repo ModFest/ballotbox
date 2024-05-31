@@ -13,7 +13,7 @@ import net.modfest.ballotbox.data.VotingSelections;
 import java.util.List;
 
 public record S2CVoteScreenData(List<VotingCategory> categories, List<VotingOption> options, VotingSelections selections) implements CustomPayload {
-    public static final CustomPayload.Id<S2CVoteScreenData> ID = new CustomPayload.Id<>(new Identifier(BallotBox.ID, "vote_screen_data"));
+    public static final CustomPayload.Id<S2CVoteScreenData> ID = new CustomPayload.Id<>(Identifier.method_60655(BallotBox.ID, "vote_screen_data"));
     public static final PacketCodec<RegistryByteBuf, S2CVoteScreenData> CODEC = PacketCodec.tuple(
         PacketCodecs.fromCodec(VotingCategory.CODEC).apply(PacketCodecs.toCollection()), S2CVoteScreenData::categories,
         PacketCodecs.fromCodec(VotingOption.CODEC).apply(PacketCodecs.toCollection()), S2CVoteScreenData::options,
