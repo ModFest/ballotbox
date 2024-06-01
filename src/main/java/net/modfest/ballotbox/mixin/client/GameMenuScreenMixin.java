@@ -25,6 +25,6 @@ public class GameMenuScreenMixin {
     }
     @ModifyArg(method = "initWidgets", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/widget/layout/GridWidget$AdditionHelper;add(Lnet/minecraft/client/gui/widget/Widget;)Lnet/minecraft/client/gui/widget/Widget;", ordinal = 3))
     private Widget replaceReportBugs(Widget original) {
-        return ButtonWidget.builder(Text.of("ModFest Discord"), ConfirmLinkScreen.method_49625((GameMenuScreen) (Object) this, BallotBox.CONFIG.discord_url.value())).width(98).build();
+        return ButtonWidget.builder(Text.of(BallotBox.CONFIG.bug_text.value()), ConfirmLinkScreen.method_49625((GameMenuScreen) (Object) this, BallotBox.CONFIG.bug_url.value())).width(98).build();
     }
 }

@@ -16,5 +16,6 @@ public class BallotBox implements ModInitializer {
         LOGGER.info("[BallotBox] Initialized!");
         BallotBoxNetworking.init();
         CommandRegistrationCallback.EVENT.register(BallotBoxCommands::register);
+        BallotBoxPlatformClient.init();
     }
 }
