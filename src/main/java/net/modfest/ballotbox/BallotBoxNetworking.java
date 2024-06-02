@@ -21,7 +21,9 @@ public class BallotBoxNetworking {
     }
 
     public static void sendVoteScreenData(ServerPlayerEntity player) {
-        ServerPlayNetworking.send(player, new S2CVoteScreenData(BallotBoxPlatformClient.categories, BallotBoxPlatformClient.options, BallotBoxPlatformClient.getSelections(player.getUuid())));
+        BallotBoxPlatformClient.getSelections(player.getUuid()).thenAccept(selections -> {
+            ServerPlayNetworking.send(player, new S2CVoteScreenData(BallotBoxPlatformClient.categories, BallotBoxPlatformClient.options, selections));
+        });
     }
 
     private static void handleOpenVoteScreen(OpenVoteScreenPacket packet, ServerPlayNetworking.Context context) {
@@ -29,10 +31,12 @@ public class BallotBoxNetworking {
     }
 
     private static void handleUpdateVote(C2SUpdateVote packet, ServerPlayNetworking.Context context) {
-        if (BallotBoxPlatformClient.putSelections(context.player().getUuid(), packet.selections())) {
-            context.player().sendMessage(Text.literal("[BallotBox] ").formatted(Formatting.AQUA).append(Text.literal("Votes Saved! You assigned %s/%s votes over %s/%s categories.".formatted(packet.selections().selections().size(), BallotBoxPlatformClient.categories.stream().mapToInt(VotingCategory::limit).sum(), packet.selections().selections().keySet().size(), BallotBoxPlatformClient.categories.size())).formatted(Formatting.GREEN)), true);
-        } else {
-            BallotBox.LOGGER.info("zomg posts your secrets in the log {} {} {}", BallotBox.CONFIG.platform_secret.value(), BallotBox.CONFIG.platform_secret.value(), BallotBox.CONFIG.platform_secret.value());
-        }
+        BallotBoxPlatformClient.putSelections(context.player().getUuid(), packet.selections()).thenAccept(success -> {
+            if (success) {
+                context.player().sendMessage(Text.literal("[BallotBox] ").formatted(Formatting.AQUA).append(Text.literal("Votes Saved! You assigned %s/%s votes over %s/%s categories.".formatted(packet.selections().votes().size(), BallotBoxPlatformClient.categories.stream().mapToInt(VotingCategory::limit).sum(), packet.selections().votes().keySet().size(), BallotBoxPlatformClient.categories.size())).formatted(Formatting.GREEN)), true);
+            } else {
+                BallotBox.LOGGER.info("zomg posts your secrets in the log {} {} {}", BallotBox.CONFIG.platform_secret.value(), BallotBox.CONFIG.platform_secret.value(), BallotBox.CONFIG.platform_secret.value());
+            }
+        });
     }
 }

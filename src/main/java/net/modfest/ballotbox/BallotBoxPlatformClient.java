@@ -16,6 +16,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 public class BallotBoxPlatformClient {
     public static HttpClient client = HttpClient.newBuilder().build();
@@ -41,24 +42,32 @@ public class BallotBoxPlatformClient {
         return gson.fromJson(new BufferedReader(new InputStreamReader(ClassLoaderUtil.getClassLoader(BallotBoxNetworking.class).getResourceAsStream("test/options.json"))), JsonArray.class).asList().stream().map(e -> VotingOption.CODEC.decode(JsonOps.INSTANCE, e).getOrThrow().getFirst()).toList();
     }
 
-    public static VotingSelections getSelections(UUID playerId) {
-        try { // Simulate request lag
-            Thread.sleep(500);
-        } catch (Exception ignored2) {
-        }
+    public static CompletableFuture<VotingSelections> getSelections(UUID playerId) {
         String uri = BallotBox.CONFIG.selections_url.value().formatted(BallotBox.CONFIG.eventId.value(), playerId.toString());
         BallotBox.LOGGER.info("[BallotBox] I'm totally getting selections from %s!".formatted(uri));
-        return selections.computeIfAbsent(playerId, BallotBoxPlatformClient::getSelectionsInternal);
+        return CompletableFuture.supplyAsync(() -> {
+            try { // Simulate request lag
+                Thread.sleep(500);
+            } catch (Exception ignored2) {
+            }
+            return selections.computeIfAbsent(playerId, BallotBoxPlatformClient::getSelectionsInternal);
+        });
     }
 
     private static VotingSelections getSelectionsInternal(UUID playerId) {
         return VotingSelections.CODEC.decode(JsonOps.INSTANCE, gson.fromJson(new BufferedReader(new InputStreamReader(ClassLoaderUtil.getClassLoader(BallotBoxNetworking.class).getResourceAsStream("test/selections.json"))), JsonObject.class)).getOrThrow().getFirst();
     }
 
-    public static boolean putSelections(UUID uuid, VotingSelections playerSelections) {
+    public static CompletableFuture<Boolean> putSelections(UUID uuid, VotingSelections playerSelections) {
         String uri = BallotBox.CONFIG.options_url.value().formatted(BallotBox.CONFIG.eventId.value());
         BallotBox.LOGGER.info("[BallotBox] I'm totally posting selections to %s!".formatted(uri));
-        selections.put(uuid, playerSelections);
-        return true;
+        return CompletableFuture.supplyAsync(() -> {
+            try { // Simulate request lag
+                Thread.sleep(500);
+            } catch (Exception ignored2) {
+            }
+            selections.put(uuid, playerSelections);
+            return true;
+        });
     }
 }

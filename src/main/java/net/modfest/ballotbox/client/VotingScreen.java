@@ -140,9 +140,9 @@ public class VotingScreen extends SpruceScreen {
     public void load(S2CVoteScreenData packet) {
         if (!loaded) {
             selections.clear();
-            selections.putAll(packet.selections().selections());
+            selections.putAll(packet.selections().votes());
             previousSelections.clear();
-            previousSelections.putAll(packet.selections().selections());
+            previousSelections.putAll(packet.selections().votes());
             categories.clear();
             categories.addAll(packet.categories());
             options.clear();
