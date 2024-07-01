@@ -36,9 +36,11 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class VotingScreen extends SpruceScreen {
@@ -62,6 +64,9 @@ public class VotingScreen extends SpruceScreen {
     protected int sidePanelWidth;
     protected int sidePanelVerticalPadding;
     protected Map<String, CategoryContainerWidget> categoryWidgets = new HashMap<>();
+
+    private final Set<String> modIconChecked = new HashSet<>();
+    private final Map<String, Identifier> modIconCache = new HashMap<>();
 
     public VotingScreen() {
         super(TITLE);
@@ -178,15 +183,20 @@ public class VotingScreen extends SpruceScreen {
             this.parent = parent;
             selected = selections.containsEntry(category.id(), option.id());
             this.prohibited = prohibited;
-            FabricLoader.getInstance().getModContainer(option.id()).ifPresent(mod -> {
-                mod.getMetadata().getIconPath(16).ifPresent(iconPath -> mod.findPath(iconPath).ifPresent(path -> {
-                    try (InputStream inputStream = Files.newInputStream(path)) {
-                        texture = Identifier.of(BallotBox.ID, mod.getMetadata().getId() + "_icon");
-                        this.client.getTextureManager().registerTexture(texture, new NativeImageBackedTexture(NativeImage.read(inputStream)));
-                    } catch (IOException ignored) {
-                    }
-                }));
-            });
+            if (!modIconChecked.contains(option.id())) {
+                FabricLoader.getInstance().getModContainer(option.id()).ifPresent(mod -> {
+                    mod.getMetadata().getIconPath(16).ifPresent(iconPath -> mod.findPath(iconPath).ifPresent(path -> {
+                        try (InputStream inputStream = Files.newInputStream(path)) {
+                            Identifier textureId = Identifier.of(BallotBox.ID, mod.getMetadata().getId() + "_icon");
+                            modIconCache.put(option.id(), textureId);
+                            this.client.getTextureManager().registerTexture(textureId, new NativeImageBackedTexture(NativeImage.read(inputStream)));
+                        } catch (IOException ignored) {
+                        }
+                    }));
+                });
+                modIconChecked.add(option.id());
+            }
+            texture = modIconCache.get(option.id());
             if (option.platform().type().equals("modrinth")) url = "https://modrinth.com/mod/%s".formatted(option.platform().project_id()); // Use project ID later
             setTooltip(url == null ? Text.literal(option.description()).formatted(Formatting.GRAY) : Text.literal(option.description()).formatted(Formatting.GRAY).append(Text.literal("\n")).append(Text.literal("Right-Click").formatted(Formatting.GOLD)).append(Text.literal(" to open the mod page.").formatted(Formatting.WHITE)));
         }
