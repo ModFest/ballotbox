@@ -4,7 +4,6 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.texture.NativeImage;
 import dev.lambdaurora.spruceui.Position;
 import dev.lambdaurora.spruceui.background.EmptyBackground;
 import dev.lambdaurora.spruceui.screen.SpruceScreen;
@@ -14,7 +13,8 @@ import dev.lambdaurora.spruceui.widget.container.SpruceOptionListWidget;
 import dev.lambdaurora.spruceui.widget.container.tabbed.SpruceTabbedWidget;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.texture.NativeImage;
 import net.minecraft.client.texture.NativeImageBackedTexture;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
@@ -50,7 +50,7 @@ public class VotingScreen extends SpruceScreen {
     );
 
     // FIXME: Placeholder
-    public static final Identifier LOCKUP_TEXTURE = Identifier.method_60655("modfest", "textures/art/graphics/lockup-transparent.png");
+    public static final Identifier LOCKUP_TEXTURE = Identifier.of("modfest", "textures/art/graphics/lockup-transparent.png");
     public static final int LOCKUP_TEXTURE_WIDTH = 1129; //141;
     public static final int LOCKUP_TEXTURE_HEIGHT = 256; //32;
 
@@ -98,34 +98,34 @@ public class VotingScreen extends SpruceScreen {
             if (tabs.getList().children().size() < categories.size() + typedCategories.keySet().size() - 1) tabs.addSeparatorEntry(null);
         });
         tabs.getList().setBackground(EmptyBackground.EMPTY_BACKGROUND);
-        addDrawableSelectableElement(tabs);
+        addSelectableChild(tabs);
     }
 
     @Override
-    public void renderBackground(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
-        super.renderBackground(graphics, mouseX, mouseY, delta);
+    public void renderBackground(DrawContext context, int mouseX, int mouseY, float delta) {
+        super.renderBackground(context, mouseX, mouseY, delta);
         if (loaded) {
-            graphics.fill(0, 0, sidePanelWidth, height, 0x30000000);
+            context.fill(0, 0, sidePanelWidth, height, 0x30000000);
         }
     }
 
-    public void renderLockup(GuiGraphics graphics) {
+    public void renderLockup(DrawContext context) {
         RenderSystem.enableBlend();
         int drawHeight = sidePanelWidth * LOCKUP_TEXTURE_HEIGHT / LOCKUP_TEXTURE_WIDTH;
-        graphics.drawTexture(LOCKUP_TEXTURE, 0, (sidePanelVerticalPadding - drawHeight) / 2, sidePanelWidth, drawHeight, 0, 0, LOCKUP_TEXTURE_WIDTH, LOCKUP_TEXTURE_HEIGHT, LOCKUP_TEXTURE_WIDTH, LOCKUP_TEXTURE_HEIGHT);
+        context.drawTexture(LOCKUP_TEXTURE, 0, (sidePanelVerticalPadding - drawHeight) / 2, sidePanelWidth, drawHeight, 0, 0, LOCKUP_TEXTURE_WIDTH, LOCKUP_TEXTURE_HEIGHT, LOCKUP_TEXTURE_WIDTH, LOCKUP_TEXTURE_HEIGHT);
         RenderSystem.disableBlend();
     }
 
     @Override
-    public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
-        renderBackground(graphics, mouseX, mouseY, delta);
+    public void render(DrawContext context, int mouseX, int mouseY, float delta) {
+        renderBackground(context, mouseX, mouseY, delta);
         if (loaded) {
-            super.render(graphics, mouseX, mouseY, delta);
-            renderLockup(graphics);
-            graphics.drawVerticalLine(sidePanelWidth, 0, height, 0xFFFFFFFF);
+            super.render(context, mouseX, mouseY, delta);
+            renderLockup(context);
+            context.drawVerticalLine(sidePanelWidth, 0, height, 0xFFFFFFFF);
         } else {
             int textWidth = textRenderer.getWidth(LOADING_INDICATOR);
-            graphics.drawText(textRenderer, LOADING_INDICATOR, width - textWidth - 10, height - 15, 0xFFFFFFFF, true);
+            context.drawText(textRenderer, LOADING_INDICATOR, width - textWidth - 10, height - 15, 0xFFFFFFFF, true);
         }
     }
 
@@ -153,8 +153,8 @@ public class VotingScreen extends SpruceScreen {
     }
 
     public class VotingOptionButtonWidget extends SpruceButtonWidget {
-        public static final Identifier VOTED_TEXTURE = Identifier.method_60655(BallotBox.ID, "button_voted");
-        public static final Identifier CHECKMARK_TEXTURE = Identifier.method_60655(BallotBox.ID, "textures/gui/button_checkmark.png");
+        public static final Identifier VOTED_TEXTURE = Identifier.of(BallotBox.ID, "button_voted");
+        public static final Identifier CHECKMARK_TEXTURE = Identifier.of(BallotBox.ID, "textures/gui/button_checkmark.png");
 
         public final CategoryContainerWidget parent;
         public boolean selected;
@@ -182,7 +182,7 @@ public class VotingScreen extends SpruceScreen {
             FabricLoader.getInstance().getModContainer(option.id()).ifPresent(mod -> {
                 mod.getMetadata().getIconPath(16).ifPresent(iconPath -> mod.findPath(iconPath).ifPresent(path -> {
                     try (InputStream inputStream = Files.newInputStream(path)) {
-                        texture = Identifier.method_60655(BallotBox.ID, mod.getMetadata().getId() + "_icon");
+                        texture = Identifier.of(BallotBox.ID, mod.getMetadata().getId() + "_icon");
                         this.client.getTextureManager().registerTexture(texture, new NativeImageBackedTexture(NativeImage.read(inputStream)));
                     } catch (IOException ignored) {
                     }
@@ -220,16 +220,16 @@ public class VotingScreen extends SpruceScreen {
         }
 
         @Override
-        protected void renderButton(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
+        protected void renderButton(DrawContext context, int mouseX, int mouseY, float delta) {
             int textWidth = client.textRenderer.getWidth(getMessage());
             int left = getX() + 2, right = getX() + getWidth() - 2;
             int bottom = getY() + getHeight();
             int textY = (getY() * 2 + getHeight() - 9) / 2 + 1;
             if (texture != null) {
-                graphics.drawTexture(texture, left, getY() + 2, 16, 16, 0, 0, 16, 16, 16, 16);
+                context.drawTexture(texture, left, getY() + 2, 16, 16, 0, 0, 16, 16, 16, 16);
             }
             if (textWidth <= getWidth()) {
-                graphics.drawCenteredShadowedText(client.textRenderer, getMessage(), left + getWidth() / 2, textY, 0xFFFFFFFF);
+                context.drawCenteredTextWithShadow(client.textRenderer, getMessage(), left + getWidth() / 2, textY, 0xFFFFFFFF);
                 return;
             }
             int extraWidth = textWidth - getWidth();
@@ -237,24 +237,24 @@ public class VotingScreen extends SpruceScreen {
             double clampedWidth = Math.max(extraWidth * 0.5, 3.0);
             double scroll = Math.sin((Math.PI / 2.0) * Math.cos((Math.PI * 2) * seconds / clampedWidth)) / 2.0 + 0.5;
             double offset = MathHelper.lerp(scroll, 0.0, extraWidth);
-            graphics.enableScissor(left, Math.max(getY(), parent.getY()), right, bottom);
-            graphics.drawShadowedText(client.textRenderer, getMessage(), left - (int) offset, textY, 0xFFFFFFFF);
-            graphics.disableScissor();
+            context.enableScissor(left, Math.max(getY(), parent.getY()), right, bottom);
+            context.drawTextWithShadow(client.textRenderer, getMessage(), left - (int) offset, textY, 0xFFFFFFFF);
+            context.disableScissor();
         }
 
         @Override
-        protected void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
-            super.renderWidget(graphics, mouseX, mouseY, delta);
+        protected void renderWidget(DrawContext context, int mouseX, int mouseY, float delta) {
+            super.renderWidget(context, mouseX, mouseY, delta);
             if (selected) {
-                graphics.drawTexture(CHECKMARK_TEXTURE, getX() + getWidth() - 11, getY() + getHeight() - 9, 0, 0, 7, 6, 7, 6);
+                context.drawTexture(CHECKMARK_TEXTURE, getX() + getWidth() - 11, getY() + getHeight() - 9, 0, 0, 7, 6, 7, 6);
             }
         }
 
         @Override
-        public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
-            graphics.enableScissor(parent.getX(), parent.getY(), parent.getX() + parent.getWidth(), parent.getY() + parent.getHeight());
-            super.render(graphics, mouseX, mouseY, delta);
-            graphics.disableScissor();
+        public void render(DrawContext context, int mouseX, int mouseY, float delta) {
+            context.enableScissor(parent.getX(), parent.getY(), parent.getX() + parent.getWidth(), parent.getY() + parent.getHeight());
+            super.render(context, mouseX, mouseY, delta);
+            context.disableScissor();
         }
     }
 
@@ -309,22 +309,22 @@ public class VotingScreen extends SpruceScreen {
             });
         }
 
-        public float drawTitleText(GuiGraphics graphics) {
+        public float drawTitleText(DrawContext context) {
             int titleWidth = client.textRenderer.getWidth(titleText);
             float titleScale = Math.min((float) (width - 20) / titleWidth, 2.0f);
-            graphics.getMatrices().push();
-            graphics.getMatrices().translate(getPosition().getX() + 10, 10, 0);
-            graphics.getMatrices().scale(titleScale, titleScale, 1.0f);
-            graphics.drawText(client.textRenderer, titleText, 0, 0, 0xFFFFFFFF, true);
-            graphics.getMatrices().pop();
+            context.getMatrices().push();
+            context.getMatrices().translate(getPosition().getX() + 10, 10, 0);
+            context.getMatrices().scale(titleScale, titleScale, 1.0f);
+            context.drawText(client.textRenderer, titleText, 0, 0, 0xFFFFFFFF, true);
+            context.getMatrices().pop();
             return titleScale;
         }
 
         @Override
-        protected void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
-            float titleScale = drawTitleText(graphics);
-            graphics.drawText(client.textRenderer, Text.literal(category.description()), getPosition().getX() + 10, 15 + (int) (9 * titleScale), 0xFFFFFFFF, true);
-            super.renderWidget(graphics, mouseX, mouseY, delta);
+        protected void renderWidget(DrawContext context, int mouseX, int mouseY, float delta) {
+            float titleScale = drawTitleText(context);
+            context.drawText(client.textRenderer, Text.literal(category.description()), getPosition().getX() + 10, 15 + (int) (9 * titleScale), 0xFFFFFFFF, true);
+            super.renderWidget(context, mouseX, mouseY, delta);
         }
     }
 }
