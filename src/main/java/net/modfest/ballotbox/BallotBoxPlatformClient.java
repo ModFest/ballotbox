@@ -10,7 +10,10 @@ import net.modfest.ballotbox.data.VotingOption;
 import net.modfest.ballotbox.data.VotingSelections;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.http.HttpClient;
 import java.util.HashMap;
 import java.util.List;
@@ -39,7 +42,11 @@ public class BallotBoxPlatformClient {
     private static List<VotingOption> getOptions(String eventId) {
         String uri = BallotBox.CONFIG.options_url.value().formatted(BallotBox.CONFIG.eventId.value());
         BallotBox.LOGGER.info("[BallotBox] I'm totally getting options from %s!".formatted(uri));
-        return gson.fromJson(new BufferedReader(new InputStreamReader(ClassLoaderUtil.getClassLoader(BallotBoxNetworking.class).getResourceAsStream("test/options.json"))), JsonArray.class).asList().stream().map(e -> VotingOption.CODEC.decode(JsonOps.INSTANCE, e).getOrThrow().getFirst()).toList();
+        try {
+            return gson.fromJson(new BufferedReader(new InputStreamReader((new URI(uri)).toURL().openStream())), JsonArray.class).asList().stream().map(e -> VotingOption.CODEC.decode(JsonOps.INSTANCE, e).getOrThrow().getFirst()).toList();
+        } catch (IOException | URISyntaxException e) {
+            throw new RuntimeException("Failed to retrieve ballotbox options from specified url", e);
+        }
     }
 
     public static CompletableFuture<VotingSelections> getSelections(UUID playerId) {

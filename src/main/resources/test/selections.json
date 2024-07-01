@@ -1,26 +1,20 @@
 {
-  "personal_favorite": [
-    "cerulean"
+  "best_carnival_themed": [
+    "carnival_cuisine"
   ],
   "most_likely_to_use": [
-    "pescatore"
+    "splinecart"
+  ],
+  "funniest": [
+    "dancerizer"
   ],
   "most_innovative": [
-    "perihelion"
+    "dusty"
   ],
   "most_polished": [
-    "partnership"
+    "ouch"
   ],
   "most_potential": [
-    "mutagen"
-  ],
-  "best_sky_themed": [
-    "starcaller"
-  ],
-  "best_sea_themed": [
-    "boatism"
-  ],
-  "best_sky_and_sea_themed": [
-    "toxsky"
+    "powerchord"
   ]
 }

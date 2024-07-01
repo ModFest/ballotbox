@@ -49,10 +49,9 @@ public class VotingScreen extends SpruceScreen {
         "community"
     );
 
-    // FIXME: Placeholder
     public static final Identifier LOCKUP_TEXTURE = Identifier.of("modfest", "textures/art/graphics/lockup-transparent.png");
-    public static final int LOCKUP_TEXTURE_WIDTH = 1129; //141;
-    public static final int LOCKUP_TEXTURE_HEIGHT = 256; //32;
+    public static final int LOCKUP_TEXTURE_WIDTH = 878;
+    public static final int LOCKUP_TEXTURE_HEIGHT = 256;
 
     protected final Multimap<String, String> previousSelections = HashMultimap.create();
     protected final Multimap<String, String> selections = HashMultimap.create();
@@ -188,7 +187,7 @@ public class VotingScreen extends SpruceScreen {
                     }
                 }));
             });
-            if (option.type().equals("modrinth")) url = "https://modrinth.com/mod/%s".formatted(option.id()); // Use project ID later
+            if (option.platform().type().equals("modrinth")) url = "https://modrinth.com/mod/%s".formatted(option.platform().project_id()); // Use project ID later
             setTooltip(url == null ? Text.literal(option.description()).formatted(Formatting.GRAY) : Text.literal(option.description()).formatted(Formatting.GRAY).append(Text.literal("\n")).append(Text.literal("Right-Click").formatted(Formatting.GOLD)).append(Text.literal(" to open the mod page.").formatted(Formatting.WHITE)));
         }
 

@@ -6,7 +6,7 @@ import folk.sisby.kaleido.lib.quiltconfig.api.values.TrackedValue;
 
 public class BallotBoxConfig extends ReflectiveConfig {
     @Comment("The event ID to use when making requests to the API")
-    public final TrackedValue<String> eventId = value("1.20");
+    public final TrackedValue<String> eventId = value("carnival");
     @Comment("The secret to use when making requests to the API")
     public final TrackedValue<String> platform_secret = value("secret");
     @Comment("The URL to request vote categories from, with an optional event ID %s placeholder")

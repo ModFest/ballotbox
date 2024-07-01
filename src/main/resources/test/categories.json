@@ -1,24 +1,31 @@
 [
   {
-    "id": "personal_favorite",
-    "name": "Personal Favorite",
-    "description": "Personally favoured mods.",
-    "type": "community",
+    "id": "best_carnival_themed",
+    "name": "Best Carnival-Themed",
+    "description": "The best of the best!",
+    "type": "theme",
     "limit": 5
+  },
+  {
+    "id": "funniest",
+    "name": "Funniest",
+    "description": "Mods with a great sense of humour.",
+    "type": "community",
+    "limit": 3
   },
   {
     "id": "most_likely_to_use",
     "name": "Most Likely to Use",
-    "description": "Mods that'll end up in everyone's personal modpack.",
+    "description": "Essential, approachable mods for future packs.",
     "type": "community",
-    "limit": 5
+    "limit": 3
   },
   {
     "id": "most_innovative",
     "name": "Most Innovative",
-    "description": "Mods with fresh, unique, surprising ideas.",
+    "description": "Mods pushing the medium with fresh, surprising ideas.",
     "type": "community",
-    "limit": 5
+    "limit": 3
   },
   {
     "id": "most_polished",
@@ -28,37 +35,16 @@
     "prohibitions": [
       "most_potential"
     ],
-    "limit": 5
+    "limit": 3
   },
   {
     "id": "most_potential",
     "name": "Most Potential",
-    "description": "An early vision of something incredible.",
+    "description": "Mods whose best features lay in their future.",
     "type": "community",
     "prohibitions": [
       "most_polished"
     ],
-    "limit": 5
-  },
-  {
-    "id": "best_sky_themed",
-    "name": "Best Sky-Themed",
-    "description": "Best fits for the \"Sky\" theme!",
-    "type": "theme",
-    "limit": 5
-  },
-  {
-    "id": "best_sea_themed",
-    "name": "Best Sea-Themed",
-    "description": "Best fits for the \"Sea\" theme!",
-    "type": "theme",
-    "limit": 5
-  },
-  {
-    "id": "best_sky_and_sea_themed",
-    "name": "Best Sky-and-Sea Themed",
-    "description": "Best fits for the \"Sky and Sea\" theme!",
-    "type": "theme",
-    "limit": 5
+    "limit": 3
   }
 ]
