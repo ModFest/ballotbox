@@ -28,7 +28,7 @@
     ]
   },
   "depends": {
-    "minecraft": ">=1.21-",
+    "minecraft": ">=${mc}",
     "fabricloader": ">=${fl}",
     "fabric-api": ">=${fapi}",
     "spruceui": ">=${spruceui}"
