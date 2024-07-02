@@ -9,6 +9,7 @@ import net.minecraft.client.gui.screen.GameMenuScreen;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.GridWidget;
+import net.minecraft.client.gui.widget.Widget;
 import net.minecraft.text.Text;
 import net.modfest.ballotbox.BallotBox;
 import net.modfest.ballotbox.client.VotingScreen;
@@ -18,12 +19,15 @@ import org.spongepowered.asm.mixin.injection.At;
 
 @Mixin(GameMenuScreen.class)
 public class GameMenuScreenMixin {
-    @WrapOperation(method = "initWidgets", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screen/GameMenuScreen;addFeedbackAndBugsButtons(Lnet/minecraft/client/gui/screen/Screen;Lnet/minecraft/client/gui/widget/GridWidget$Adder;)V"))
-    private void replaceSendFeedback(Screen parentScreen, GridWidget.Adder gridAdder, Operation<Void> original) {
-        gridAdder.add(ButtonWidget.builder(Text.of("Submission Voting"), b -> {
+    @WrapOperation(method = "addFeedbackAndBugsButtons", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/widget/GridWidget$Adder;add(Lnet/minecraft/client/gui/widget/Widget;)Lnet/minecraft/client/gui/widget/Widget;", ordinal = 0))
+    private static Widget replaceSendFeedback(GridWidget.Adder instance, Widget widget, Operation<Widget> original, Screen parentScreen, GridWidget.Adder gridAdder) {
+        return gridAdder.add(ButtonWidget.builder(Text.of("Submission Voting"), b -> {
             MinecraftClient.getInstance().setScreen(new VotingScreen());
             ClientPlayNetworking.send(new OpenVoteScreenPacket());
         }).width(98).build());
-        gridAdder.add(ButtonWidget.builder(Text.of(BallotBox.CONFIG.bug_text.value()), ConfirmLinkScreen.opening((GameMenuScreen) (Object) this, BallotBox.CONFIG.bug_url.value())).width(98).build());
+    }
+    @WrapOperation(method = "addFeedbackAndBugsButtons", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/widget/GridWidget$Adder;add(Lnet/minecraft/client/gui/widget/Widget;)Lnet/minecraft/client/gui/widget/Widget;", ordinal = 1))
+    private static Widget replaceReportBugs(GridWidget.Adder instance, Widget widget, Operation<Widget> original, Screen parentScreen, GridWidget.Adder gridAdder) {
+        return gridAdder.add(ButtonWidget.builder(Text.of(BallotBox.CONFIG.bug_text.value()), ConfirmLinkScreen.opening(parentScreen, BallotBox.CONFIG.bug_url.value())).width(98).build());
     }
 }
