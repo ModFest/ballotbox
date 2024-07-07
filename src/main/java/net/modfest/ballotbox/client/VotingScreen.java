@@ -184,16 +184,17 @@ public class VotingScreen extends SpruceScreen {
             selected = selections.containsEntry(category.id(), option.id());
             this.prohibited = prohibited;
             if (!modIconChecked.contains(option.id())) {
-                FabricLoader.getInstance().getModContainer(option.id()).ifPresent(mod -> {
-                    mod.getMetadata().getIconPath(16).ifPresent(iconPath -> mod.findPath(iconPath).ifPresent(path -> {
+                FabricLoader.getInstance().getModContainer(option.id())
+                    .or(() -> FabricLoader.getInstance().getModContainer(option.id().replace('_', '-')))
+                    .or(() -> FabricLoader.getInstance().getModContainer(option.id().replace("_", "")))
+                    .ifPresent(mod -> mod.getMetadata().getIconPath(16).ifPresent(iconPath -> mod.findPath(iconPath).ifPresent(path -> {
                         try (InputStream inputStream = Files.newInputStream(path)) {
                             Identifier textureId = Identifier.of(BallotBox.ID, mod.getMetadata().getId() + "_icon");
                             modIconCache.put(option.id(), textureId);
                             this.client.getTextureManager().registerTexture(textureId, new NativeImageBackedTexture(NativeImage.read(inputStream)));
                         } catch (IOException ignored) {
                         }
-                    }));
-                });
+                    })));
                 modIconChecked.add(option.id());
             }
             texture = modIconCache.get(option.id());
