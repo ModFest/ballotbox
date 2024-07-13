@@ -15,62 +15,46 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.http.HttpClient;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 public class BallotBoxPlatformClient {
     public static final Identifier CATEGORIES_DATA = Identifier.of(BallotBox.ID, "ballot/categories.json");
     public final static Gson GSON = new Gson();
-    public static HttpClient client = HttpClient.newBuilder().build();
-    public static List<VotingOption> options = new ArrayList<>();
-    public static List<VotingCategory> categories = new ArrayList<>();
+    public static Map<String, VotingOption> options = new HashMap<>();
+    public static Map<String, VotingCategory> categories = new HashMap<>();
 
     public static void init(ResourceManager resourceManager) {
         if (options.isEmpty()) options = getOptions(BallotBox.CONFIG.eventId.value());
         try {
-            categories = GSON.fromJson(new BufferedReader(new InputStreamReader(resourceManager.getResourceOrThrow(CATEGORIES_DATA).getInputStream())), JsonArray.class).asList().stream().map(e -> VotingCategory.CODEC.decode(JsonOps.INSTANCE, e).getOrThrow().getFirst()).toList();
+            categories.clear();
+            GSON.fromJson(new BufferedReader(new InputStreamReader(resourceManager.getResourceOrThrow(CATEGORIES_DATA).getInputStream())), JsonArray.class).asList().stream().map(e -> VotingCategory.CODEC.decode(JsonOps.INSTANCE, e).getOrThrow().getFirst()).forEach(category -> categories.put(category.id(), category));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
-    private static List<VotingOption> getOptions(String eventId) {
-        String uri = BallotBox.CONFIG.options_url.value().formatted(BallotBox.CONFIG.eventId.value());
+    private static Map<String, VotingOption> getOptions(String eventId) {
+        String uri = BallotBox.CONFIG.options_url.value().formatted(eventId);
         BallotBox.LOGGER.info("[BallotBox] Retrieving vote options from %s!".formatted(uri));
+        Map<String, VotingOption> options = new HashMap<>();
         try {
-            return GSON.fromJson(new BufferedReader(new InputStreamReader((new URI(uri)).toURL().openStream())), JsonArray.class).asList().stream().map(e -> VotingOption.CODEC.decode(JsonOps.INSTANCE, e).getOrThrow().getFirst()).toList();
+            GSON.fromJson(new BufferedReader(new InputStreamReader((new URI(uri)).toURL().openStream())), JsonArray.class).asList().stream().map(e -> VotingOption.CODEC.decode(JsonOps.INSTANCE, e).getOrThrow().getFirst()).forEach(option -> options.put(option.id(), option));
         } catch (IOException | URISyntaxException e) {
-            BallotBox.LOGGER.error("Failed to retrieve ballotbox options from specified url", e);
-            return new ArrayList<>();
+            BallotBox.LOGGER.error("[BallotBox] Failed to retrieve ballotbox options from specified url", e);
         }
+        return options;
     }
 
     public static CompletableFuture<VotingSelections> getSelections(UUID playerId) {
-        String uri = BallotBox.CONFIG.selections_url.value().formatted(BallotBox.CONFIG.eventId.value(), playerId.toString());
-        // BallotBox.LOGGER.info("[BallotBox] I'm totally getting selections from %s!".formatted(uri));
-        return CompletableFuture.supplyAsync(() -> {
-            try { // Simulate request lag
-                Thread.sleep(5);
-            } catch (Exception ignored2) {
-            }
-            return BallotBox.STATE.selections().getOrDefault(playerId, new VotingSelections(HashMultimap.create()));
-        });
+        return CompletableFuture.completedFuture(BallotBox.STATE.selections().getOrDefault(playerId, new VotingSelections(HashMultimap.create())));
     }
 
     public static CompletableFuture<Boolean> putSelections(UUID uuid, VotingSelections playerSelections) {
-        String uri = BallotBox.CONFIG.options_url.value().formatted(BallotBox.CONFIG.eventId.value());
-        // BallotBox.LOGGER.info("[BallotBox] I'm totally posting selections to %s!".formatted(uri));
-        return CompletableFuture.supplyAsync(() -> {
-            try { // Simulate request lag
-                Thread.sleep(5);
-            } catch (Exception ignored2) {
-            }
-            BallotBox.STATE.selections().put(uuid, playerSelections);
-            BallotBox.STATE.markDirty();
-            return true;
-        });
+        BallotBox.STATE.selections().put(uuid, playerSelections);
+        BallotBox.STATE.markDirty();
+        return CompletableFuture.completedFuture(true);
     }
 }

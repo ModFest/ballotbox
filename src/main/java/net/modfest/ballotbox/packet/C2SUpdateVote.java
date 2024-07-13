@@ -1,4 +1,4 @@
-package net.modfest.ballotbox.client.packet;
+package net.modfest.ballotbox.packet;
 
 import net.minecraft.network.RegistryByteBuf;
 import net.minecraft.network.codec.PacketCodec;

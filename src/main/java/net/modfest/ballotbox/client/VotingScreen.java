@@ -22,7 +22,7 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.MathHelper;
 import net.modfest.ballotbox.BallotBox;
-import net.modfest.ballotbox.client.packet.C2SUpdateVote;
+import net.modfest.ballotbox.packet.C2SUpdateVote;
 import net.modfest.ballotbox.data.VotingCategory;
 import net.modfest.ballotbox.data.VotingOption;
 import net.modfest.ballotbox.data.VotingSelections;
@@ -164,7 +164,7 @@ public class VotingScreen extends SpruceScreen {
         public boolean selected;
         public boolean prohibited;
         public String url;
-        Identifier texture = null;
+        public Identifier texture;
 
         public VotingOptionButtonWidget(Position position, int width, int height, VotingCategory category, VotingOption option, CategoryContainerWidget parent, boolean prohibited) {
             super(position, width, height, Text.literal(option.name()), button -> {
@@ -187,14 +187,14 @@ public class VotingScreen extends SpruceScreen {
                 FabricLoader.getInstance().getModContainer(option.id())
                     .or(() -> FabricLoader.getInstance().getModContainer(option.id().replace('_', '-')))
                     .or(() -> FabricLoader.getInstance().getModContainer(option.id().replace("_", "")))
-                    .ifPresent(mod -> mod.getMetadata().getIconPath(16).ifPresent(iconPath -> mod.findPath(iconPath).ifPresent(path -> {
+                    .ifPresent(mod -> mod.getMetadata().getIconPath(16).flatMap(mod::findPath).ifPresent(path -> {
                         try (InputStream inputStream = Files.newInputStream(path)) {
                             Identifier textureId = Identifier.of(BallotBox.ID, mod.getMetadata().getId() + "_icon");
                             modIconCache.put(option.id(), textureId);
                             this.client.getTextureManager().registerTexture(textureId, new NativeImageBackedTexture(NativeImage.read(inputStream)));
                         } catch (IOException ignored) {
                         }
-                    })));
+                    }));
                 modIconChecked.add(option.id());
             }
             texture = modIconCache.get(option.id());
