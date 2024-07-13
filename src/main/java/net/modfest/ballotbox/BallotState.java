@@ -9,17 +9,17 @@ import net.minecraft.util.Uuids;
 import net.minecraft.world.PersistentState;
 import net.modfest.ballotbox.data.VotingSelections;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class BallotState extends PersistentState {
     public static final Codec<BallotState> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-        Codec.unboundedMap(Uuids.CODEC, VotingSelections.CODEC).fieldOf("selections").forGetter(BallotState::selections)
+        Codec.unboundedMap(Uuids.CODEC, VotingSelections.CODEC).xmap(s -> (Map<UUID, VotingSelections>) new ConcurrentHashMap<>(s), ConcurrentHashMap::new).fieldOf("selections").forGetter(BallotState::selections)
     ).apply(instance, BallotState::new));
 
     public static PersistentState.Type<BallotState> getPersistentStateType() {
-        return new PersistentState.Type<>(() -> new BallotState(new HashMap<>()), BallotState::fromNbt, null);
+        return new PersistentState.Type<>(() -> new BallotState(new ConcurrentHashMap<>()), BallotState::fromNbt, null);
     }
 
     private final Map<UUID, VotingSelections> selections;

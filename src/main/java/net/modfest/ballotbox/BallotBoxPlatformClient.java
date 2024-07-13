@@ -15,16 +15,16 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class BallotBoxPlatformClient {
     public static final Identifier CATEGORIES_DATA = Identifier.of(BallotBox.ID, "ballot/categories.json");
     public final static Gson GSON = new Gson();
-    public static Map<String, VotingOption> options = new HashMap<>();
-    public static Map<String, VotingCategory> categories = new HashMap<>();
+    public static Map<String, VotingOption> options = new ConcurrentHashMap<>();
+    public static Map<String, VotingCategory> categories = new ConcurrentHashMap<>();
 
     public static void init(ResourceManager resourceManager) {
         if (options.isEmpty()) options = getOptions(BallotBox.CONFIG.eventId.value());
@@ -39,7 +39,7 @@ public class BallotBoxPlatformClient {
     private static Map<String, VotingOption> getOptions(String eventId) {
         String uri = BallotBox.CONFIG.options_url.value().formatted(eventId);
         BallotBox.LOGGER.info("[BallotBox] Retrieving vote options from %s!".formatted(uri));
-        Map<String, VotingOption> options = new HashMap<>();
+        Map<String, VotingOption> options = new ConcurrentHashMap<>();
         try {
             GSON.fromJson(new BufferedReader(new InputStreamReader((new URI(uri)).toURL().openStream())), JsonArray.class).asList().stream().map(e -> VotingOption.CODEC.decode(JsonOps.INSTANCE, e).getOrThrow().getFirst()).forEach(option -> options.put(option.id(), option));
         } catch (IOException | URISyntaxException e) {

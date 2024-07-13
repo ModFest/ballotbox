@@ -14,5 +14,5 @@ public class BallotBoxConfig extends ReflectiveConfig {
     @Comment("The link to use to replace the bug report button")
     public final TrackedValue<String> bug_url = value("https://discord.gg/gn543Ee");
     @Comment("The number of top results to show when displaying voting results")
-    public final TrackedValue<Integer> category_limit = value(8);
+    public final TrackedValue<Integer> awardLimit = value(8);
 }

@@ -41,6 +41,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 public class VotingScreen extends SpruceScreen {
@@ -63,10 +64,10 @@ public class VotingScreen extends SpruceScreen {
 
     protected int sidePanelWidth;
     protected int sidePanelVerticalPadding;
-    protected Map<String, CategoryContainerWidget> categoryWidgets = new HashMap<>();
+    protected Map<String, CategoryContainerWidget> categoryWidgets = new ConcurrentHashMap<>();
 
     private final Set<String> modIconChecked = new HashSet<>();
-    private final Map<String, Identifier> modIconCache = new HashMap<>();
+    private final Map<String, Identifier> modIconCache = new ConcurrentHashMap<>();
 
     public VotingScreen() {
         super(TITLE);
@@ -271,7 +272,7 @@ public class VotingScreen extends SpruceScreen {
     public class CategoryContainerWidget extends SpruceContainerWidget {
         public final VotingCategory category;
 
-        public Map<String, VotingOptionButtonWidget> buttons = new HashMap<>();
+        public Map<String, VotingOptionButtonWidget> buttons = new ConcurrentHashMap<>();
         public Text titleText;
 
         public CategoryContainerWidget(Position position, int width, int height, VotingCategory category) {

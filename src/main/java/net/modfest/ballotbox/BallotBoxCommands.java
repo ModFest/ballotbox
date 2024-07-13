@@ -17,8 +17,8 @@ import net.modfest.ballotbox.data.VotingCategory;
 import net.modfest.ballotbox.data.VotingOption;
 import net.modfest.ballotbox.packet.OpenVoteScreenPacket;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 
 public class BallotBoxCommands {
@@ -57,7 +57,7 @@ public class BallotBoxCommands {
     }
 
     private static int votes(ServerPlayerEntity player, String ignored, Consumer<Text> feedback) {
-        Map<VotingCategory, Multiset<VotingOption>> votes = new HashMap<>();
+        Map<VotingCategory, Multiset<VotingOption>> votes = new ConcurrentHashMap<>();
         BallotBox.STATE.selections().forEach((uuid, selections) -> selections.votes().forEach((category, option) -> {
             if (BallotBoxPlatformClient.categories.containsKey(category) && BallotBoxPlatformClient.options.containsKey(option)) {
                 votes.computeIfAbsent(BallotBoxPlatformClient.categories.get(category), k -> HashMultiset.create()).add(BallotBoxPlatformClient.options.get(option));
@@ -65,10 +65,10 @@ public class BallotBoxCommands {
         }));
         feedback.accept(Text.literal("[BallotBox] ").formatted(Formatting.GREEN).append(Text.literal("%d players have submitted %d votes so far!".formatted(BallotBox.STATE.selections().size(), votes.size())).formatted(Formatting.AQUA)));
         votes.forEach((category, options) -> {
-            feedback.accept(Text.literal("[BallotBox] ").formatted(Formatting.GREEN).append(Text.literal("--- Top 5 for %s ---".formatted(category.name())).formatted(Formatting.LIGHT_PURPLE)));
+            feedback.accept(Text.literal("[BallotBox] ").formatted(Formatting.GREEN).append(Text.literal("--- Top %d for %s ---".formatted(BallotBox.CONFIG.awardLimit.value(), category.name())).formatted(Formatting.LIGHT_PURPLE)));
             int i = 0;
             for (Multiset.Entry<VotingOption> e : Multisets.copyHighestCountFirst(options).entrySet()) {
-                if (i >= BallotBox.CONFIG.category_limit.value()) return;
+                if (i >= BallotBox.CONFIG.awardLimit.value()) return;
                 feedback.accept(Text.literal("[BallotBox] ").formatted(Formatting.GREEN).append(Text.literal("%d - %s".formatted(e.getCount(), e.getElement().name())).formatted(Formatting.YELLOW)));
                 i++;
             }
