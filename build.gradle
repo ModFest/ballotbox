@@ -86,7 +86,6 @@ if (System.getenv("MODRINTH_TOKEN")) {
         detectLoaders = false
         dependencies {
             required.version libs.fapi.get().getName(), libs.versions.fapi.get()
-            embedded.version libs.spruceui.get().getName(), libs.versions.spruceui.get()
         }
         changelog = rootProject.file("CHANGELOG.md").text + "\n\nFull Changelog: https://github.com/modfest/ballotbox/releases/tag/v$baseVersion"
         syncBodyFrom = rootProject.file("README.md").text
