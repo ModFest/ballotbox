@@ -63,7 +63,7 @@ public class BallotBoxCommands {
                 votes.computeIfAbsent(BallotBoxPlatformClient.categories.get(category), k -> HashMultiset.create()).add(BallotBoxPlatformClient.options.get(option));
             }
         }));
-        feedback.accept(Text.literal("[BallotBox] ").formatted(Formatting.GREEN).append(Text.literal("%d players have submitted %d votes so far!".formatted(BallotBox.STATE.selections().size(), votes.size())).formatted(Formatting.AQUA)));
+        feedback.accept(Text.literal("[BallotBox] ").formatted(Formatting.GREEN).append(Text.literal("%d players have submitted %d votes so far!".formatted(BallotBox.STATE.selections().size(), votes.values().stream().mapToInt(Multiset::size).sum())).formatted(Formatting.AQUA)));
         votes.forEach((category, options) -> {
             feedback.accept(Text.literal("[BallotBox] ").formatted(Formatting.GREEN).append(Text.literal("--- Top %d for %s ---".formatted(BallotBox.CONFIG.awardLimit.value(), category.name())).formatted(Formatting.LIGHT_PURPLE)));
             int i = 0;
@@ -74,7 +74,7 @@ public class BallotBoxCommands {
             }
         });
         feedback.accept(Text.literal("[BallotBox] ").formatted(Formatting.GREEN).append(Text.literal("--- End Votes ---").formatted(Formatting.AQUA)));
-        return votes.size();
+        return 0;
     }
 
     private static int vote(ServerPlayerEntity player, String ignored, Consumer<Text> feedback) {
