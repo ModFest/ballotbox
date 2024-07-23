@@ -18,6 +18,7 @@ Players can vote for options (usually mods) across multiple award categories usi
 - API-driven vote options intended for the ModFest platform API.
 - Selections saved to persistent world state.
 - Use `/votes` (op 4) to tally the top options for each category.
+- Tracking of vote closing date (via config), and automatic vote closing.
 
 ---
 
