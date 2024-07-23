@@ -2,16 +2,24 @@ package net.modfest.ballotbox.client;
 
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.MinecraftClient;
-import net.modfest.ballotbox.packet.OpenVoteScreenPacket;
+import net.modfest.ballotbox.BallotBox;
+import net.modfest.ballotbox.packet.OpenVoteScreen;
+import net.modfest.ballotbox.packet.S2CGameJoin;
 import net.modfest.ballotbox.packet.S2CVoteScreenData;
 
 public class BallotBoxClientNetworking {
     public static void init() {
+        ClientPlayNetworking.registerGlobalReceiver(S2CGameJoin.ID, BallotBoxClientNetworking::handleGameJoin);
         ClientPlayNetworking.registerGlobalReceiver(S2CVoteScreenData.ID, BallotBoxClientNetworking::handleVoteScreenData);
-        ClientPlayNetworking.registerGlobalReceiver(OpenVoteScreenPacket.ID, BallotBoxClientNetworking::handleOpenVoteScreen);
+        ClientPlayNetworking.registerGlobalReceiver(OpenVoteScreen.ID, BallotBoxClientNetworking::handleOpenVoteScreen);
     }
 
-    private static void handleOpenVoteScreen(OpenVoteScreenPacket packet, ClientPlayNetworking.Context context) {
+    private static void handleGameJoin(S2CGameJoin packet, ClientPlayNetworking.Context context) {
+        NotBallotBoxClient.closingTime = BallotBox.parseClosingTime(packet.closingTime());
+        NotBallotBoxClient.remainingVotes = packet.remainingVotes();
+    }
+
+    private static void handleOpenVoteScreen(OpenVoteScreen packet, ClientPlayNetworking.Context context) {
         MinecraftClient.getInstance().setScreen(new VotingScreen());
     }
 

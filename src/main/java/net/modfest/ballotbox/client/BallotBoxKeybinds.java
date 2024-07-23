@@ -6,7 +6,10 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
-import net.modfest.ballotbox.packet.OpenVoteScreenPacket;
+import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
+import net.modfest.ballotbox.BallotBox;
+import net.modfest.ballotbox.packet.OpenVoteScreen;
 
 public class BallotBoxKeybinds {
     public static final KeyBinding OPEN_VOTING_SCREEN = new KeyBinding("key.ballotbox.open", InputUtil.Type.KEYSYM, InputUtil.GLFW_KEY_APOSTROPHE, "key.ballotbox.category");
@@ -17,10 +20,12 @@ public class BallotBoxKeybinds {
     }
 
     private static void tick(MinecraftClient client) {
-        while (OPEN_VOTING_SCREEN.wasPressed()) {
-            if (client.currentScreen == null) {
+        while (OPEN_VOTING_SCREEN.wasPressed() && NotBallotBoxClient.isEnabled(client)) {
+            if (!NotBallotBoxClient.isOpen()) {
+                client.inGameHud.setOverlayMessage(Text.literal("[BallotBox] ").formatted(Formatting.GREEN).append(Text.literal("Voting is unavailable! Voting closed %s.".formatted(BallotBox.relativeTime(NotBallotBoxClient.closingTime))).formatted(Formatting.RED)), false);
+            } else if (client.currentScreen == null) {
                 client.setScreen(new VotingScreen());
-                ClientPlayNetworking.send(new OpenVoteScreenPacket());
+                ClientPlayNetworking.send(new OpenVoteScreen());
             }
         }
     }
