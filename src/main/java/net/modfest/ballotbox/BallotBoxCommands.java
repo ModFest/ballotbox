@@ -75,6 +75,10 @@ public class BallotBoxCommands {
             feedback.accept(Text.literal("[BallotBox] ").formatted(Formatting.GREEN).append(Text.literal("Vote cannot be invoked by a non-player").formatted(Formatting.RED)));
             return 0;
         }
+        if (!ServerPlayNetworking.canSend(player, OpenVoteScreen.ID)) {
+            feedback.accept(Text.literal("[BallotBox] ").formatted(Formatting.GREEN).append(Text.literal("Voting requires BallotBox on the client!").formatted(Formatting.RED)));
+            return 0;
+        }
         if (!BallotBox.isOpen()) {
             feedback.accept(Text.literal("[BallotBox] ").formatted(Formatting.GREEN).append(Text.literal("Voting is unavailable! Voting closed %s.".formatted(BallotBox.relativeTime(BallotBox.closingTime))).formatted(Formatting.RED)));
             return 0;

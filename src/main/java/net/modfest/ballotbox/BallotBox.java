@@ -5,6 +5,7 @@ import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerWorldEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.World;
@@ -76,6 +77,7 @@ public class BallotBox implements ModInitializer {
             BallotBoxPlatformClient.init(resourceManager);
         }));
         ServerPlayConnectionEvents.JOIN.register(((handler, sender, server) -> {
+            if (!ServerPlayNetworking.canSend(handler.getPlayer(), S2CGameJoin.ID)) return;
             VotingSelections selections = STATE.selections().get(handler.getPlayer().getUuid());
             int totalVotes = BallotBoxPlatformClient.categories.values().stream().mapToInt(VotingCategory::limit).sum();
             int remainingVotes = totalVotes - (selections == null ? 0 : selections.votes().size());
