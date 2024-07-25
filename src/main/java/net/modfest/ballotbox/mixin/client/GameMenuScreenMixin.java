@@ -15,7 +15,7 @@ import net.minecraft.client.gui.widget.Widget;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.modfest.ballotbox.BallotBox;
-import net.modfest.ballotbox.client.NotBallotBoxClient;
+import net.modfest.ballotbox.client.BallotBoxClient;
 import net.modfest.ballotbox.client.VotingScreen;
 import net.modfest.ballotbox.packet.OpenVoteScreen;
 import org.spongepowered.asm.mixin.Mixin;
@@ -29,30 +29,30 @@ public class GameMenuScreenMixin {
 
     @WrapOperation(method = "addFeedbackAndBugsButtons", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/widget/GridWidget$Adder;add(Lnet/minecraft/client/gui/widget/Widget;)Lnet/minecraft/client/gui/widget/Widget;", ordinal = 0))
     private static Widget replaceSendFeedback(GridWidget.Adder instance, Widget widget, Operation<Widget> original, Screen parentScreen, GridWidget.Adder gridAdder) {
-        if (!NotBallotBoxClient.isEnabled(MinecraftClient.getInstance())) return original.call(instance, widget);
+        if (!BallotBoxClient.isEnabled(MinecraftClient.getInstance())) return original.call(instance, widget);
         ballotbox$voteButton = ButtonWidget.builder(Text.of("Submission Voting"), b -> {
             MinecraftClient.getInstance().setScreen(new VotingScreen());
             ClientPlayNetworking.send(new OpenVoteScreen());
-        }).width(98).tooltip(NotBallotBoxClient.isOpen() ? null : Tooltip.of(Text.literal("Closed %s.".formatted(BallotBox.relativeTime(NotBallotBoxClient.closingTime))).formatted(Formatting.GRAY))).build();
-        ballotbox$voteButton.active = NotBallotBoxClient.isOpen();
+        }).width(98).tooltip(BallotBoxClient.isOpen() ? null : Tooltip.of(Text.literal("Closed %s.".formatted(BallotBox.relativeTime(BallotBoxClient.closingTime))).formatted(Formatting.GRAY))).build();
+        ballotbox$voteButton.active = BallotBoxClient.isOpen();
         return gridAdder.add(ballotbox$voteButton);
     }
 
     @WrapOperation(method = "addFeedbackAndBugsButtons", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/widget/GridWidget$Adder;add(Lnet/minecraft/client/gui/widget/Widget;)Lnet/minecraft/client/gui/widget/Widget;", ordinal = 1))
     private static Widget replaceReportBugs(GridWidget.Adder instance, Widget widget, Operation<Widget> original, Screen parentScreen, GridWidget.Adder gridAdder) {
-        if (!NotBallotBoxClient.isEnabled(MinecraftClient.getInstance())) return original.call(instance, widget);
+        if (!BallotBoxClient.isEnabled(MinecraftClient.getInstance())) return original.call(instance, widget);
         return gridAdder.add(ButtonWidget.builder(Text.of(BallotBox.CONFIG.bug_text.value()), ConfirmLinkScreen.opening(parentScreen, BallotBox.CONFIG.bug_url.value())).width(98).build());
     }
 
     @Inject(method = "render", at = @At("TAIL"))
     private void addReminder(DrawContext context, int mouseX, int mouseY, float delta, CallbackInfo ci) {
         if (ballotbox$voteButton == null) return;
-        ballotbox$voteButton.active = NotBallotBoxClient.isOpen();
-        if (NotBallotBoxClient.isOpen() && NotBallotBoxClient.remainingVotes > 0) {
-            Text remainingText = Text.literal("%s vote%s available!".formatted(NotBallotBoxClient.remainingVotes, NotBallotBoxClient.remainingVotes > 1 ? "s" : "")).formatted(Formatting.GREEN);
+        ballotbox$voteButton.active = BallotBoxClient.isOpen();
+        if (BallotBoxClient.isOpen() && BallotBoxClient.remainingVotes > 0) {
+            Text remainingText = Text.literal("%s vote%s available!".formatted(BallotBoxClient.remainingVotes, BallotBoxClient.remainingVotes > 1 ? "s" : "")).formatted(Formatting.GREEN);
             context.drawText(MinecraftClient.getInstance().textRenderer, remainingText, ballotbox$voteButton.getX() - MinecraftClient.getInstance().textRenderer.getWidth(remainingText) - 2, ballotbox$voteButton.getY() + 2, 0xFFFFFFFF, true);
-            if (NotBallotBoxClient.closingTime != null) {
-                Text timeText = Text.literal("Closes %s.".formatted(BallotBox.relativeTime(NotBallotBoxClient.closingTime))).formatted(Formatting.YELLOW);
+            if (BallotBoxClient.closingTime != null) {
+                Text timeText = Text.literal("Closes %s.".formatted(BallotBox.relativeTime(BallotBoxClient.closingTime))).formatted(Formatting.YELLOW);
                 context.drawText(MinecraftClient.getInstance().textRenderer, timeText, ballotbox$voteButton.getX() - MinecraftClient.getInstance().textRenderer.getWidth(timeText) - 2, ballotbox$voteButton.getY() + 10, 0xFFFFFFFF, true);
             }
         }

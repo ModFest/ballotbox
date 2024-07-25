@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
 
 import java.time.Instant;
 
-public class NotBallotBoxClient implements ClientModInitializer {
+public class BallotBoxClient implements ClientModInitializer {
     public static final Logger LOGGER = LoggerFactory.getLogger("%s-client".formatted(BallotBox.ID));
     public static Instant closingTime = null;
     public static int remainingVotes = 0;

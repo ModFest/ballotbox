@@ -20,9 +20,9 @@ public class BallotBoxKeybinds {
     }
 
     private static void tick(MinecraftClient client) {
-        while (OPEN_VOTING_SCREEN.wasPressed() && NotBallotBoxClient.isEnabled(client)) {
-            if (!NotBallotBoxClient.isOpen()) {
-                client.inGameHud.setOverlayMessage(Text.literal("[BallotBox] ").formatted(Formatting.GREEN).append(Text.literal("Voting is unavailable! Voting closed %s.".formatted(BallotBox.relativeTime(NotBallotBoxClient.closingTime))).formatted(Formatting.RED)), false);
+        while (OPEN_VOTING_SCREEN.wasPressed() && BallotBoxClient.isEnabled(client)) {
+            if (!BallotBoxClient.isOpen()) {
+                client.inGameHud.setOverlayMessage(Text.literal("[BallotBox] ").formatted(Formatting.GREEN).append(Text.literal("Voting is unavailable! Voting closed %s.".formatted(BallotBox.relativeTime(BallotBoxClient.closingTime))).formatted(Formatting.RED)), false);
             } else if (client.currentScreen == null) {
                 client.setScreen(new VotingScreen());
                 ClientPlayNetworking.send(new OpenVoteScreen());

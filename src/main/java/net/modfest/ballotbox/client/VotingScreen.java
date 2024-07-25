@@ -136,7 +136,7 @@ public class VotingScreen extends SpruceScreen {
     @Override
     public void removed() {
         if (!previousSelections.equals(selections)) {
-            NotBallotBoxClient.remainingVotes = categories.stream().mapToInt(VotingCategory::limit).sum() - selections.size();
+            BallotBoxClient.remainingVotes = categories.stream().mapToInt(VotingCategory::limit).sum() - selections.size();
             ClientPlayNetworking.send(new C2SUpdateVote(new VotingSelections(selections)));
         }
         super.removed();
