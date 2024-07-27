@@ -35,10 +35,11 @@ public class BallotBox implements ModInitializer {
         long days = TimeUnit.MILLISECONDS.toDays(Math.abs(offset));
         if (days > 0) return (offset > 0 ? "%s days ago" : "in %s days").formatted(days);
         long hours = TimeUnit.MILLISECONDS.toHours(Math.abs(offset));
-        if (hours > 0) return (offset > 0 ? "%s hours ago" : "in %s hours").formatted(days);
+        if (hours > 0) return (offset > 0 ? "%s hours ago" : "in %s hours").formatted(hours);
         long minutes = TimeUnit.MILLISECONDS.toMinutes(Math.abs(offset));
-        if (minutes > 0) return (offset > 0 ? "%s minutes ago" : "in %s minutes").formatted(days);
-        return (offset > 0 ? "%s seconds ago" : "in %s seconds").formatted(TimeUnit.MILLISECONDS.toSeconds(offset));
+        if (minutes > 0) return (offset > 0 ? "%s minutes ago" : "in %s minutes").formatted(minutes);
+        long seconds = TimeUnit.MILLISECONDS.toSeconds(offset);
+        return (offset > 0 ? "%s seconds ago" : "in %s seconds").formatted(seconds);
     }
 
     public static boolean isEnabled(MinecraftServer server) {
