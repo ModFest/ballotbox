@@ -3,11 +3,11 @@
 plugins {
 	id "maven-publish"
 	alias libs.plugins.loom
+	alias libs.plugins.minotaur
 }
 
 version = "$project.baseVersion+$project.branch"
 archivesBaseName = project.archivesName
-group = "net.modfest"
 
 repositories {
 	maven { url "https://maven.terraformersmc.com/releases" }
@@ -68,4 +68,15 @@ publishing {
 			from components.java
 		}
 	}
+}
+
+modrinth {
+	token = System.getenv("MODRINTH_TOKEN")
+	projectId = "ballotbox"
+	dependencies {
+		required.version "fabric-api", libs.versions.fapi.get()
+	}
+	changelog = System.getenv("CHANGELOG")
+	syncBodyFrom = "<!--DO NOT EDIT MANUALLY: synced from gh readme-->\n" + rootProject.file("README.md").text
+	uploadFile = remapJar
 }
