@@ -13,6 +13,7 @@ Intended for use in <a href="https://modfest.net">ModFest</a> events.
 Players can vote for options (usually mods) across multiple award categories using a hotkey (`'`), from the pause menu, or by running `/vote`.
 
 **Features:**
+
 - Server-driven voting UI - the server sends voting options, categories, and any previous vote selections.
 - Data-driven vote categories.
 - API-driven vote options intended for the ModFest platform API.

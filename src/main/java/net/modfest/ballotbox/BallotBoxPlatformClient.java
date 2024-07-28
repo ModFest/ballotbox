@@ -21,40 +21,40 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class BallotBoxPlatformClient {
-    public static final Identifier CATEGORIES_DATA = Identifier.of(BallotBox.ID, "ballot/categories.json");
-    public final static Gson GSON = new Gson();
-    public static Map<String, VotingOption> options = new ConcurrentHashMap<>();
-    public static Map<String, VotingCategory> categories = new ConcurrentHashMap<>();
+	public static final Identifier CATEGORIES_DATA = Identifier.of(BallotBox.ID, "ballot/categories.json");
+	public final static Gson GSON = new Gson();
+	public static Map<String, VotingOption> options = new ConcurrentHashMap<>();
+	public static Map<String, VotingCategory> categories = new ConcurrentHashMap<>();
 
-    public static void init(ResourceManager resourceManager) {
-        if (options.isEmpty()) options = getOptions(BallotBox.CONFIG.eventId.value());
-        try {
-            categories.clear();
-            GSON.fromJson(new BufferedReader(new InputStreamReader(resourceManager.getResourceOrThrow(CATEGORIES_DATA).getInputStream())), JsonArray.class).asList().stream().map(e -> VotingCategory.CODEC.decode(JsonOps.INSTANCE, e).getOrThrow().getFirst()).forEach(category -> categories.put(category.id(), category));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
+	public static void init(ResourceManager resourceManager) {
+		if (options.isEmpty()) options = getOptions(BallotBox.CONFIG.eventId.value());
+		try {
+			categories.clear();
+			GSON.fromJson(new BufferedReader(new InputStreamReader(resourceManager.getResourceOrThrow(CATEGORIES_DATA).getInputStream())), JsonArray.class).asList().stream().map(e -> VotingCategory.CODEC.decode(JsonOps.INSTANCE, e).getOrThrow().getFirst()).forEach(category -> categories.put(category.id(), category));
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
 
-    private static Map<String, VotingOption> getOptions(String eventId) {
-        String uri = BallotBox.CONFIG.options_url.value().formatted(eventId);
-        BallotBox.LOGGER.info("[BallotBox] Retrieving vote options from %s!".formatted(uri));
-        Map<String, VotingOption> options = new ConcurrentHashMap<>();
-        try {
-            GSON.fromJson(new BufferedReader(new InputStreamReader((new URI(uri)).toURL().openStream())), JsonArray.class).asList().stream().map(e -> VotingOption.CODEC.decode(JsonOps.INSTANCE, e).getOrThrow().getFirst()).forEach(option -> options.put(option.id(), option));
-        } catch (IOException | URISyntaxException e) {
-            BallotBox.LOGGER.error("[BallotBox] Failed to retrieve ballotbox options from specified url", e);
-        }
-        return options;
-    }
+	private static Map<String, VotingOption> getOptions(String eventId) {
+		String uri = BallotBox.CONFIG.options_url.value().formatted(eventId);
+		BallotBox.LOGGER.info("[BallotBox] Retrieving vote options from %s!".formatted(uri));
+		Map<String, VotingOption> options = new ConcurrentHashMap<>();
+		try {
+			GSON.fromJson(new BufferedReader(new InputStreamReader((new URI(uri)).toURL().openStream())), JsonArray.class).asList().stream().map(e -> VotingOption.CODEC.decode(JsonOps.INSTANCE, e).getOrThrow().getFirst()).forEach(option -> options.put(option.id(), option));
+		} catch (IOException | URISyntaxException e) {
+			BallotBox.LOGGER.error("[BallotBox] Failed to retrieve ballotbox options from specified url", e);
+		}
+		return options;
+	}
 
-    public static CompletableFuture<VotingSelections> getSelections(UUID playerId) {
-        return CompletableFuture.completedFuture(BallotBox.STATE.selections().getOrDefault(playerId, new VotingSelections(HashMultimap.create())));
-    }
+	public static CompletableFuture<VotingSelections> getSelections(UUID playerId) {
+		return CompletableFuture.completedFuture(BallotBox.STATE.selections().getOrDefault(playerId, new VotingSelections(HashMultimap.create())));
+	}
 
-    public static CompletableFuture<Boolean> putSelections(UUID uuid, VotingSelections playerSelections) {
-        BallotBox.STATE.selections().put(uuid, playerSelections);
-        BallotBox.STATE.markDirty();
-        return CompletableFuture.completedFuture(true);
-    }
+	public static CompletableFuture<Boolean> putSelections(UUID uuid, VotingSelections playerSelections) {
+		BallotBox.STATE.selections().put(uuid, playerSelections);
+		BallotBox.STATE.markDirty();
+		return CompletableFuture.completedFuture(true);
+	}
 }

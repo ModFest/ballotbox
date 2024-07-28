@@ -12,21 +12,21 @@ import net.modfest.ballotbox.BallotBox;
 import net.modfest.ballotbox.packet.OpenVoteScreen;
 
 public class BallotBoxKeybinds {
-    public static final KeyBinding OPEN_VOTING_SCREEN = new KeyBinding("key.ballotbox.open", InputUtil.Type.KEYSYM, InputUtil.GLFW_KEY_APOSTROPHE, "key.ballotbox.category");
+	public static final KeyBinding OPEN_VOTING_SCREEN = new KeyBinding("key.ballotbox.open", InputUtil.Type.KEYSYM, InputUtil.GLFW_KEY_APOSTROPHE, "key.ballotbox.category");
 
-    public static void init() {
-        KeyBindingHelper.registerKeyBinding(OPEN_VOTING_SCREEN);
-        ClientTickEvents.END_CLIENT_TICK.register(BallotBoxKeybinds::tick);
-    }
+	public static void init() {
+		KeyBindingHelper.registerKeyBinding(OPEN_VOTING_SCREEN);
+		ClientTickEvents.END_CLIENT_TICK.register(BallotBoxKeybinds::tick);
+	}
 
-    private static void tick(MinecraftClient client) {
-        while (OPEN_VOTING_SCREEN.wasPressed() && BallotBoxClient.isEnabled(client)) {
-            if (!BallotBoxClient.isOpen()) {
-                client.inGameHud.setOverlayMessage(Text.literal("[BallotBox] ").formatted(Formatting.GREEN).append(Text.literal("Voting is unavailable! Voting closed %s.".formatted(BallotBox.relativeTime(BallotBoxClient.closingTime))).formatted(Formatting.RED)), false);
-            } else if (client.currentScreen == null) {
-                client.setScreen(new VotingScreen());
-                ClientPlayNetworking.send(new OpenVoteScreen());
-            }
-        }
-    }
+	private static void tick(MinecraftClient client) {
+		while (OPEN_VOTING_SCREEN.wasPressed() && BallotBoxClient.isEnabled(client)) {
+			if (!BallotBoxClient.isOpen()) {
+				client.inGameHud.setOverlayMessage(Text.literal("[BallotBox] ").formatted(Formatting.GREEN).append(Text.literal("Voting is unavailable! Voting closed %s.".formatted(BallotBox.relativeTime(BallotBoxClient.closingTime))).formatted(Formatting.RED)), false);
+			} else if (client.currentScreen == null) {
+				client.setScreen(new VotingScreen());
+				ClientPlayNetworking.send(new OpenVoteScreen());
+			}
+		}
+	}
 }

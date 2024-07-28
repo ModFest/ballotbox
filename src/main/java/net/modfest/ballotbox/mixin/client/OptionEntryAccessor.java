@@ -7,8 +7,8 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 @Mixin(SpruceOptionListWidget.OptionEntry.class)
 public interface OptionEntryAccessor {
 
-    @Invoker("<init>")
-    static SpruceOptionListWidget.OptionEntry ballotbox$create(SpruceOptionListWidget parent) {
-        return null;
-    }
+	@Invoker("<init>")
+	static SpruceOptionListWidget.OptionEntry ballotbox$create(SpruceOptionListWidget parent) {
+		return null;
+	}
 }

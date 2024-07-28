@@ -1,39 +1,37 @@
 {
-  "schemaVersion": 1,
-  "id": "ballotbox",
-  "version": "${version}",
-  "name": "Ballotbox",
-  "description": "Vote on ModFest submissions in-game",
-  "authors": [
-    "ModFest"
-  ],
-  "contributors": [
-    "Prospector",
-    "Sisby folk",
-    "acikek"
-  ],
-  "contact": {
-    "homepage": "https://modrinth.com/mod/ballotbox",
-    "issues": "https://github.com/modfest/ballotbox/issues",
-    "sources": "https://github.com/modfest/ballotbox"
-  },
-  "icon": "assets/ballotbox/icon.png",
-  "license": "MIT",
-  "entrypoints": {
-    "main": [
-      "net.modfest.ballotbox.BallotBox"
-    ],
-    "client": [
-      "net.modfest.ballotbox.client.BallotBoxClient"
-    ]
-  },
-  "depends": {
-    "minecraft": ">=${mc}",
-    "fabricloader": ">=${fl}",
-    "fabric-api": ">=${fapi}",
-    "spruceui": ">=${spruceui}"
-  },
-  "mixins": [
-    "ballotbox.mixins.json"
-  ]
+	"schemaVersion": 1,
+	"id": "${modId}",
+	"version": "${version}",
+	"name": "${modName}",
+	"description": "${modDescription}",
+	"authors": [
+		"${authors}"
+	],
+	"contributors": [
+		"${contributors}"
+	],
+	"contact": {
+		"homepage": "${homepage}",
+		"issues": "${issues}",
+		"sources": "${sources}"
+	},
+	"license": "${license}",
+	"icon": "assets/ballotbox/icon.png",
+	"entrypoints": {
+		"main": [
+			"net.modfest.ballotbox.BallotBox"
+		],
+		"client": [
+			"net.modfest.ballotbox.client.BallotBoxClient"
+		]
+	},
+	"mixins": [
+		"ballotbox.mixins.json"
+	],
+	"depends": {
+		"minecraft": ">=${mc}",
+		"fabricloader": ">=${fl}",
+		"fabric-api": ">=${fapi}",
+		"spruceui": ">=${spruceui}"
+	}
 }
