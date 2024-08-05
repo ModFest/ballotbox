@@ -23,5 +23,5 @@ Players can vote for options (usually mods) across multiple award categories usi
 
 ---
 
-This mod was originally created by Prospector, acikek, and Sisby folk for as a base mod for [ModFest: Carnival](https://modfest.net/carnival)!<br/>
+This mod was originally created by Prospector, acikek, and Sisby folk as a base mod for [ModFest: Carnival](https://modfest.net/carnival)!<br/>
 Feel free to contribute bugfixes and improvements!
