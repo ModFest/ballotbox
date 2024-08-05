@@ -3,7 +3,7 @@
 
 <center>
 In-game category voting for mods!<br/>
-Intended for use in <a href="https://modfest.net">ModFest</a> events.
+Maintained for use at <a href="https://modfest.net">ModFest</a> events.
 </center>
 
 ---
@@ -23,5 +23,5 @@ Players can vote for options (usually mods) across multiple award categories usi
 
 ---
 
-This mod was first revealed at ModFest: Carnival!<br/>
-Nifty, right?
+This mod was originally created by Prospector, acikek, and Sisby folk for as a base mod for [ModFest: Carnival](https://modfest.net/carnival)!<br/>
+Feel free to contribute bugfixes and improvements!
