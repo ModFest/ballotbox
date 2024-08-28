@@ -6,8 +6,8 @@ plugins {
 	alias libs.plugins.minotaur
 }
 
-version = "$project.baseVersion+$project.branch"
-archivesBaseName = project.archivesName
+version = "$baseVersion+$branch"
+archivesBaseName = project.slug
 
 repositories {
 	maven { url "https://maven.terraformersmc.com/releases" }
@@ -17,15 +17,17 @@ repositories {
 }
 
 dependencies {
+	implementation libs.kaleidoConfig
+	include libs.kaleidoConfig
+
 	minecraft libs.mc
 	mappings variantOf(libs.yarn) { classifier "v2" }
 	modImplementation libs.fl
-	modImplementation libs.fapi
-	modImplementation libs.spruceui
-	implementation libs.kaleidoConfig
 
+	modImplementation libs.fapi
+
+	modImplementation libs.spruceui
 	include libs.spruceui
-	include libs.kaleidoConfig
 }
 
 processResources {
@@ -34,19 +36,21 @@ processResources {
 		modId         : modId,
 		modName       : modName,
 		modDescription: modDescription,
-		homepage      : homepage,
-		issues        : issues,
-		sources       : sources,
+		homepage      : "https://modrinth.com/mod/${slug}",
+		issues        : "https://github.com/${user}/${slug}/issues",
+		sources       : "https://github.com/${user}/${slug}",
 		license       : license,
 		authors       : authors.split(", ").join("\",\n    \""),
 		contributors  : contributors.split(", ").join("\",\n    \""),
-		mc            : libs.versions.mc.get(),
+		members       : "${authors}. Contributions by ${contributors}",
+		mc            : compatibleVersions.split(", ")[0],
 		fl            : libs.versions.fl.get(),
 		fapi          : libs.versions.fapi.get(),
 		spruceui      : libs.versions.spruceui.get()
 	]
-	inputs.properties meta
-	filesMatching("fabric.mod.json") { expand meta }
+	inputs.properties(meta)
+	filesMatching("*.mod.json") { expand(meta) }
+	filesMatching("META-INF/*mods.toml") { expand(meta) }
 }
 
 tasks.withType(JavaCompile).configureEach {
@@ -56,10 +60,14 @@ tasks.withType(JavaCompile).configureEach {
 
 java {
 	withSourcesJar()
+	sourceCompatibility = JavaVersion.VERSION_21
+	targetCompatibility = JavaVersion.VERSION_21
 }
 
 jar {
-	from "LICENSE"
+	from("LICENSE") {
+		rename { "${it}_${archivesBaseName}" }
+	}
 }
 
 publishing {
@@ -71,12 +79,16 @@ publishing {
 }
 
 modrinth {
-	token = System.getenv("MODRINTH_TOKEN")
-	projectId = "ballotbox"
+	token = "$System.env.MODRINTH_TOKEN"
+	projectId = slug
+	versionNumber = project.version
+	uploadFile = remapJar
+	gameVersions = compatibleVersions.split(", ").toList()
+	loaders = compatibleLoaders.split(", ").toList()
+	changelog = "$System.env.CHANGELOG"
+	syncBodyFrom = "<!--DO NOT EDIT MANUALLY: synced from gh readme-->\n" + rootProject.file("README.md").text
 	dependencies {
 		required.version "fabric-api", libs.versions.fapi.get()
 	}
-	changelog = System.getenv("CHANGELOG")
-	syncBodyFrom = "<!--DO NOT EDIT MANUALLY: synced from gh readme-->\n" + rootProject.file("README.md").text
-	uploadFile = remapJar
 }
+
