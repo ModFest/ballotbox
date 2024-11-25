@@ -12,6 +12,7 @@ import net.modfest.ballotbox.packet.S2CGameJoin;
 import net.modfest.ballotbox.packet.S2CVoteScreenData;
 
 import java.util.ArrayList;
+import java.util.Map;
 
 public class BallotBoxNetworking {
 	public static void init() {
@@ -26,7 +27,7 @@ public class BallotBoxNetworking {
 
 	public static void sendVoteScreenData(ServerPlayerEntity player) {
 		if (!BallotBox.isOpen()) return;
-		BallotBoxPlatformClient.getSelections(player.getUuid()).thenAccept(selections -> ServerPlayNetworking.send(player, new S2CVoteScreenData(new ArrayList<>(BallotBoxPlatformClient.categories.values()), new ArrayList<>(BallotBoxPlatformClient.options.values()), selections)));
+		BallotBoxPlatformClient.getSelections(player.getUuid()).thenAccept(selections -> ServerPlayNetworking.send(player, new S2CVoteScreenData(new ArrayList<>(BallotBoxPlatformClient.categories.values()), new ArrayList<>(BallotBoxPlatformClient.options.entrySet().stream().sorted(Map.Entry.comparingByKey()).map(Map.Entry::getValue).toList()), selections)));
 	}
 
 	private static void handleOpenVoteScreen(OpenVoteScreen packet, ServerPlayNetworking.Context context) {
