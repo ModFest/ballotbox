@@ -14,12 +14,13 @@ Players can vote for options (usually mods) across multiple award categories usi
 
 **Features:**
 
-- Server-driven voting UI - the server sends voting options, categories, and any previous vote selections.
-- Data-driven vote categories.
-- API-driven vote options intended for the ModFest platform API.
-- Selections saved to persistent world state.
-- Use `/votes` (op 4) to tally the top options for each category.
-- Tracking of vote closing date (via config), and automatic vote closing.
+- Server-driven voting UI - the server sends voting options, categories, and any previous vote selections
+- Data-driven vote categories
+- Data-driven vote options
+- Vote options show mod icons when using mod IDs
+- Selections saved to persistent world state
+- Use `/votes` (op 4) to tally the top options for each category
+- Tracking of vote closing date (via config), and automatic vote closing
 
 ---
 

@@ -3,9 +3,12 @@ package net.modfest.ballotbox.data;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
-public record VotingOption(String id, String name, String description, Platform platform) {
+import java.util.Optional;
+
+public record VotingOption(String id, Optional<String> mod_id, String name, String description, Platform platform) {
 	public static final Codec<VotingOption> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 		Codec.STRING.fieldOf("id").forGetter(VotingOption::id),
+		Codec.STRING.optionalFieldOf("mod_id").forGetter(VotingOption::mod_id),
 		Codec.STRING.fieldOf("name").forGetter(VotingOption::name),
 		Codec.STRING.fieldOf("description").forGetter(VotingOption::description),
 		Platform.CODEC.fieldOf("platform").forGetter(VotingOption::platform)

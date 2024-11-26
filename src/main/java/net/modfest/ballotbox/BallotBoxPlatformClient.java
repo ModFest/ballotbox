@@ -13,8 +13,6 @@ import net.modfest.ballotbox.data.VotingSelections;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -22,30 +20,20 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class BallotBoxPlatformClient {
 	public static final Identifier CATEGORIES_DATA = Identifier.of(BallotBox.ID, "ballot/categories.json");
+	public static final Identifier OPTIONS_DATA = Identifier.of(BallotBox.ID, "ballot/options.json");
 	public final static Gson GSON = new Gson();
 	public static Map<String, VotingOption> options = new ConcurrentHashMap<>();
 	public static Map<String, VotingCategory> categories = new ConcurrentHashMap<>();
 
 	public static void init(ResourceManager resourceManager) {
-		if (options.isEmpty()) options = getOptions(BallotBox.CONFIG.eventId.value());
 		try {
 			categories.clear();
 			GSON.fromJson(new BufferedReader(new InputStreamReader(resourceManager.getResourceOrThrow(CATEGORIES_DATA).getInputStream())), JsonArray.class).asList().stream().map(e -> VotingCategory.CODEC.decode(JsonOps.INSTANCE, e).getOrThrow().getFirst()).forEach(category -> categories.put(category.id(), category));
+			options.clear();
+			GSON.fromJson(new BufferedReader(new InputStreamReader(resourceManager.getResourceOrThrow(OPTIONS_DATA).getInputStream())), JsonArray.class).asList().stream().map(e -> VotingOption.CODEC.decode(JsonOps.INSTANCE, e).getOrThrow().getFirst()).forEach(option -> options.put(option.id(), option));
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
-	}
-
-	private static Map<String, VotingOption> getOptions(String eventId) {
-		String uri = BallotBox.CONFIG.options_url.value().formatted(eventId);
-		BallotBox.LOGGER.info("[BallotBox] Retrieving vote options from %s!".formatted(uri));
-		Map<String, VotingOption> options = new ConcurrentHashMap<>();
-		try {
-			GSON.fromJson(new BufferedReader(new InputStreamReader((new URI(uri)).toURL().openStream())), JsonArray.class).asList().stream().map(e -> VotingOption.CODEC.decode(JsonOps.INSTANCE, e).getOrThrow().getFirst()).forEach(option -> options.put(option.id(), option));
-		} catch (IOException | URISyntaxException e) {
-			BallotBox.LOGGER.error("[BallotBox] Failed to retrieve ballotbox options from specified url", e);
-		}
-		return options;
 	}
 
 	public static CompletableFuture<VotingSelections> getSelections(UUID playerId) {

@@ -29,7 +29,7 @@ public class GameMenuScreenMixin {
 
 	@WrapOperation(method = "addFeedbackAndBugsButtons", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/widget/GridWidget$Adder;add(Lnet/minecraft/client/gui/widget/Widget;)Lnet/minecraft/client/gui/widget/Widget;", ordinal = 0))
 	private static Widget replaceSendFeedback(GridWidget.Adder instance, Widget widget, Operation<Widget> original, Screen parentScreen, GridWidget.Adder gridAdder) {
-		if (!BallotBoxClient.isEnabled(MinecraftClient.getInstance())) return original.call(instance, widget);
+		if (!BallotBox.CONFIG.replace_feedback.value() || !BallotBoxClient.isEnabled(MinecraftClient.getInstance())) return original.call(instance, widget);
 		ballotbox$voteButton = ButtonWidget.builder(Text.of("Submission Voting"), b -> {
 			MinecraftClient.getInstance().setScreen(new VotingScreen());
 			ClientPlayNetworking.send(new OpenVoteScreen());
@@ -40,7 +40,7 @@ public class GameMenuScreenMixin {
 
 	@WrapOperation(method = "addFeedbackAndBugsButtons", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/widget/GridWidget$Adder;add(Lnet/minecraft/client/gui/widget/Widget;)Lnet/minecraft/client/gui/widget/Widget;", ordinal = 1))
 	private static Widget replaceReportBugs(GridWidget.Adder instance, Widget widget, Operation<Widget> original, Screen parentScreen, GridWidget.Adder gridAdder) {
-		if (!BallotBoxClient.isEnabled(MinecraftClient.getInstance())) return original.call(instance, widget);
+		if (!BallotBox.CONFIG.replace_bugs.value() || !BallotBoxClient.isEnabled(MinecraftClient.getInstance())) return original.call(instance, widget);
 		return gridAdder.add(ButtonWidget.builder(Text.of(BallotBox.CONFIG.bug_text.value()), ConfirmLinkScreen.opening(parentScreen, BallotBox.CONFIG.bug_url.value())).width(98).build());
 	}
 

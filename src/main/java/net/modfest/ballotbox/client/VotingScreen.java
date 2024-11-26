@@ -13,8 +13,8 @@ import dev.lambdaurora.spruceui.widget.container.SpruceOptionListWidget;
 import dev.lambdaurora.spruceui.widget.container.tabbed.SpruceTabbedWidget;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.loader.api.FabricLoader;
+import net.fabricmc.loader.api.ModContainer;
 import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.texture.NativeImage;
 import net.minecraft.client.texture.NativeImageBackedTexture;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
@@ -28,18 +28,14 @@ import net.modfest.ballotbox.data.VotingSelections;
 import net.modfest.ballotbox.mixin.client.OptionEntryAccessor;
 import net.modfest.ballotbox.packet.C2SUpdateVote;
 import net.modfest.ballotbox.packet.S2CVoteScreenData;
+import net.modfest.ballotbox.util.ModMetaUtil;
 import org.lwjgl.glfw.GLFW;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
@@ -52,7 +48,7 @@ public class VotingScreen extends SpruceScreen {
 	);
 
 	public static final Identifier LOCKUP_TEXTURE = Identifier.of("modfest", "textures/art/graphics/lockup-transparent.png");
-	public static final int LOCKUP_TEXTURE_WIDTH = 878;
+	public static final int LOCKUP_TEXTURE_WIDTH = 1101;
 	public static final int LOCKUP_TEXTURE_HEIGHT = 256;
 
 	protected final Multimap<String, String> previousSelections = HashMultimap.create();
@@ -65,7 +61,6 @@ public class VotingScreen extends SpruceScreen {
 	protected int sidePanelVerticalPadding;
 	protected Map<String, CategoryContainerWidget> categoryWidgets = new ConcurrentHashMap<>();
 
-	private final Set<String> modIconChecked = new HashSet<>();
 	private final Map<String, Identifier> modIconCache = new ConcurrentHashMap<>();
 
 	public VotingScreen() {
@@ -184,19 +179,13 @@ public class VotingScreen extends SpruceScreen {
 			this.parent = parent;
 			selected = selections.containsEntry(category.id(), option.id());
 			this.prohibited = prohibited;
-			if (!modIconChecked.contains(option.id())) {
-				FabricLoader.getInstance().getModContainer(option.id())
-					.or(() -> FabricLoader.getInstance().getModContainer(option.id().replace('_', '-')))
-					.or(() -> FabricLoader.getInstance().getModContainer(option.id().replace("_", "")))
-					.ifPresent(mod -> mod.getMetadata().getIconPath(16).flatMap(mod::findPath).ifPresent(path -> {
-						try (InputStream inputStream = Files.newInputStream(path)) {
-							Identifier textureId = Identifier.of(BallotBox.ID, mod.getMetadata().getId() + "_icon");
-							modIconCache.put(option.id(), textureId);
-							this.client.getTextureManager().registerTexture(textureId, new NativeImageBackedTexture(NativeImage.read(inputStream)));
-						} catch (IOException ignored) {
-						}
-					}));
-				modIconChecked.add(option.id());
+			if (!modIconCache.containsKey(option.id())) {
+				modIconCache.put(option.id(), Identifier.of(BallotBox.ID, option.id() + "_icon"));
+				Optional<ModContainer> mod = FabricLoader.getInstance().getModContainer(option.id())
+					.or(() -> FabricLoader.getInstance().getModContainer(option.id().replace("_", "-")))
+					.or(() -> FabricLoader.getInstance().getModContainer(option.id().replace("_", "")));
+				NativeImageBackedTexture icon = mod.isPresent() ? ModMetaUtil.getIcon(mod.get(), 64 * this.client.options.getGuiScale().getValue()) : ModMetaUtil.getMissingIcon();
+				this.client.getTextureManager().registerTexture(modIconCache.get(option.id()), icon);
 			}
 			texture = modIconCache.get(option.id());
 			if (option.platform().type().equals("modrinth")) url = "https://modrinth.com/mod/%s".formatted(option.platform().project_id()); // Use project ID later
