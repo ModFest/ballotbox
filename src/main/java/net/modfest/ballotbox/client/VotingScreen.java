@@ -181,7 +181,7 @@ public class VotingScreen extends SpruceScreen {
 			this.prohibited = prohibited;
 			if (!modIconCache.containsKey(option.id())) {
 				modIconCache.put(option.id(), Identifier.of(BallotBox.ID, option.id() + "_icon"));
-				Optional<ModContainer> mod = FabricLoader.getInstance().getModContainer(option.id())
+				Optional<ModContainer> mod = FabricLoader.getInstance().getModContainer(option.mod_id().isPresent() ? option.mod_id().get() : option.id())
 					.or(() -> FabricLoader.getInstance().getModContainer(option.id().replace("_", "-")))
 					.or(() -> FabricLoader.getInstance().getModContainer(option.id().replace("_", "")));
 				NativeImageBackedTexture icon = mod.isPresent() ? ModMetaUtil.getIcon(mod.get(), 64 * this.client.options.getGuiScale().getValue()) : ModMetaUtil.getMissingIcon();
