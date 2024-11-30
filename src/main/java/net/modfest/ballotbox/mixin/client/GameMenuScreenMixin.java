@@ -6,6 +6,7 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.ConfirmLinkScreen;
+import net.minecraft.client.gui.screen.CreditsScreen;
 import net.minecraft.client.gui.screen.GameMenuScreen;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.tooltip.Tooltip;
@@ -28,20 +29,26 @@ public class GameMenuScreenMixin {
 	private static ButtonWidget ballotbox$voteButton = null;
 
 	@WrapOperation(method = "addFeedbackAndBugsButtons", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/widget/GridWidget$Adder;add(Lnet/minecraft/client/gui/widget/Widget;)Lnet/minecraft/client/gui/widget/Widget;", ordinal = 0))
-	private static Widget replaceSendFeedback(GridWidget.Adder instance, Widget widget, Operation<Widget> original, Screen parentScreen, GridWidget.Adder gridAdder) {
+	private static Widget replaceSendFeedback(GridWidget.Adder instance, Widget widget, Operation<Widget> original, Screen parentScreen) {
 		if (!BallotBox.CONFIG.replace_feedback.value() || !BallotBoxClient.isEnabled(MinecraftClient.getInstance())) return original.call(instance, widget);
 		ballotbox$voteButton = ButtonWidget.builder(Text.of("Submission Voting"), b -> {
 			MinecraftClient.getInstance().setScreen(new VotingScreen());
 			ClientPlayNetworking.send(new OpenVoteScreen());
 		}).width(98).tooltip(BallotBoxClient.isOpen() ? null : Tooltip.of(Text.literal("Closed %s.".formatted(BallotBox.relativeTime(BallotBoxClient.closingTime))).formatted(Formatting.GRAY))).build();
 		ballotbox$voteButton.active = BallotBoxClient.isOpen();
-		return gridAdder.add(ballotbox$voteButton);
+		return instance.add(ballotbox$voteButton);
 	}
 
 	@WrapOperation(method = "addFeedbackAndBugsButtons", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/widget/GridWidget$Adder;add(Lnet/minecraft/client/gui/widget/Widget;)Lnet/minecraft/client/gui/widget/Widget;", ordinal = 1))
-	private static Widget replaceReportBugs(GridWidget.Adder instance, Widget widget, Operation<Widget> original, Screen parentScreen, GridWidget.Adder gridAdder) {
+	private static Widget replaceReportBugs(GridWidget.Adder instance, Widget widget, Operation<Widget> original, Screen parentScreen) {
 		if (!BallotBox.CONFIG.replace_bugs.value() || !BallotBoxClient.isEnabled(MinecraftClient.getInstance())) return original.call(instance, widget);
-		return gridAdder.add(ButtonWidget.builder(Text.of(BallotBox.CONFIG.bug_text.value()), ConfirmLinkScreen.opening(parentScreen, BallotBox.CONFIG.bug_url.value())).width(98).build());
+		return instance.add(ButtonWidget.builder(Text.of(BallotBox.CONFIG.bug_text.value()), ConfirmLinkScreen.opening(parentScreen, BallotBox.CONFIG.bug_url.value())).width(98).build());
+	}
+
+	@WrapOperation(method = "initWidgets", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/widget/GridWidget$Adder;add(Lnet/minecraft/client/gui/widget/Widget;)Lnet/minecraft/client/gui/widget/Widget;", ordinal = 6))
+	private Widget replacePlayerReporting(GridWidget.Adder instance, Widget widget, Operation<Widget> original) {
+		if (!BallotBox.CONFIG.replace_reporting_credits.value()) return original.call(instance, widget);
+		return instance.add(ButtonWidget.builder(Text.of(BallotBox.CONFIG.credits_text.value()), b -> MinecraftClient.getInstance().setScreen(new CreditsScreen(false, () -> MinecraftClient.getInstance().setScreen((GameMenuScreen) (Object) this)))).width(98).build());
 	}
 
 	@Inject(method = "render", at = @At("TAIL"))

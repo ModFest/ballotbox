@@ -13,6 +13,12 @@ public class BallotBoxConfig extends ReflectiveConfig {
 	public final TrackedValue<String> bug_text = value("Modfest Discord");
 	@Comment("The link to use to replace the bug report button")
 	public final TrackedValue<String> bug_url = value("https://discord.gg/gn543Ee");
+	@Comment("Whether to replace the realms button on the title screen with a credits button")
+	public final TrackedValue<Boolean> replace_realms_credits = value(true);
+	@Comment("Whether to replace the player reporting button on the pause screen with a credits button")
+	public final TrackedValue<Boolean> replace_reporting_credits = value(true);
+	@Comment("The text to use for replacement credits but tons button")
+	public final TrackedValue<String> credits_text = value("Modpack Credits");
 	@Comment("The number of top results to show when displaying voting results")
 	public final TrackedValue<Integer> awardLimit = value(8);
 	@Comment("The closing date, as an ISO local date time - or an empty string for none")

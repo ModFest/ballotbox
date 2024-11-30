@@ -3,10 +3,9 @@
 	"minVersion": "0.8",
 	"package": "net.modfest.ballotbox.mixin",
 	"compatibilityLevel": "JAVA_21",
-	"mixins": [
-	],
 	"client": [
 		"client.GameMenuScreenMixin",
+		"client.TitleScreenMixin",
 		"client.OptionEntryAccessor"
 	],
 	"injectors": {
