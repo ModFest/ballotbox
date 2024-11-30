@@ -8,6 +8,7 @@ import net.minecraft.client.gui.screen.CreditsScreen;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.TitleScreen;
 import net.minecraft.client.gui.widget.ButtonWidget;
+import net.minecraft.sound.MusicType;
 import net.minecraft.text.Text;
 import net.modfest.ballotbox.BallotBox;
 import org.spongepowered.asm.mixin.Mixin;
@@ -23,8 +24,9 @@ public abstract class TitleScreenMixin extends Screen {
 	private Element replaceRealms(TitleScreen instance, Element element, Operation<Element> original, int y, int spacingY) {
 		if (!BallotBox.CONFIG.replace_realms_credits.value()) return original.call(instance, element);
 		return addDrawableChild(ButtonWidget.builder(Text.of(BallotBox.CONFIG.credits_text.value()), b -> {
-					MinecraftClient.getInstance().getMusicTracker().stop();
 					MinecraftClient.getInstance().setScreen(new CreditsScreen(false, () -> MinecraftClient.getInstance().setScreen((TitleScreen) (Object) this)));
+				MinecraftClient.getInstance().getMusicTracker().stop();
+				MinecraftClient.getInstance().getMusicTracker().play(MusicType.CREDITS);
 				})
 			.dimensions(this.width / 2 - 100, y + spacingY * 2, 200, 20)
 			.build()

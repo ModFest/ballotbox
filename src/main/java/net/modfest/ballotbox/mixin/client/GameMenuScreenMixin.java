@@ -13,6 +13,7 @@ import net.minecraft.client.gui.tooltip.Tooltip;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.GridWidget;
 import net.minecraft.client.gui.widget.Widget;
+import net.minecraft.sound.MusicType;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.modfest.ballotbox.BallotBox;
@@ -49,8 +50,9 @@ public class GameMenuScreenMixin {
 	private Widget replacePlayerReporting(GridWidget.Adder instance, Widget widget, Operation<Widget> original) {
 		if (!BallotBox.CONFIG.replace_reporting_credits.value()) return original.call(instance, widget);
 		return instance.add(ButtonWidget.builder(Text.of(BallotBox.CONFIG.credits_text.value()), b -> {
-			MinecraftClient.getInstance().getMusicTracker().stop();
 			MinecraftClient.getInstance().setScreen(new CreditsScreen(false, () -> MinecraftClient.getInstance().setScreen((GameMenuScreen) (Object) this)));
+			MinecraftClient.getInstance().getMusicTracker().stop();
+			MinecraftClient.getInstance().getMusicTracker().play(MusicType.CREDITS);
 		}).width(98).build());
 	}
 
