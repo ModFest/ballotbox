@@ -48,7 +48,10 @@ public class GameMenuScreenMixin {
 	@WrapOperation(method = "initWidgets", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/widget/GridWidget$Adder;add(Lnet/minecraft/client/gui/widget/Widget;)Lnet/minecraft/client/gui/widget/Widget;", ordinal = 6))
 	private Widget replacePlayerReporting(GridWidget.Adder instance, Widget widget, Operation<Widget> original) {
 		if (!BallotBox.CONFIG.replace_reporting_credits.value()) return original.call(instance, widget);
-		return instance.add(ButtonWidget.builder(Text.of(BallotBox.CONFIG.credits_text.value()), b -> MinecraftClient.getInstance().setScreen(new CreditsScreen(false, () -> MinecraftClient.getInstance().setScreen((GameMenuScreen) (Object) this)))).width(98).build());
+		return instance.add(ButtonWidget.builder(Text.of(BallotBox.CONFIG.credits_text.value()), b -> {
+			MinecraftClient.getInstance().getMusicTracker().stop();
+			MinecraftClient.getInstance().setScreen(new CreditsScreen(false, () -> MinecraftClient.getInstance().setScreen((GameMenuScreen) (Object) this)));
+		}).width(98).build());
 	}
 
 	@Inject(method = "render", at = @At("TAIL"))

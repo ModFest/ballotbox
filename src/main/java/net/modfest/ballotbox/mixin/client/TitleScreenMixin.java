@@ -22,7 +22,10 @@ public abstract class TitleScreenMixin extends Screen {
 	@WrapOperation(method = "initWidgetsNormal", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screen/TitleScreen;addDrawableChild(Lnet/minecraft/client/gui/Element;)Lnet/minecraft/client/gui/Element;", ordinal = 2))
 	private Element replaceRealms(TitleScreen instance, Element element, Operation<Element> original, int y, int spacingY) {
 		if (!BallotBox.CONFIG.replace_realms_credits.value()) return original.call(instance, element);
-		return addDrawableChild(ButtonWidget.builder(Text.of(BallotBox.CONFIG.credits_text.value()), b -> MinecraftClient.getInstance().setScreen(new CreditsScreen(false, () -> MinecraftClient.getInstance().setScreen((TitleScreen) (Object) this))))
+		return addDrawableChild(ButtonWidget.builder(Text.of(BallotBox.CONFIG.credits_text.value()), b -> {
+					MinecraftClient.getInstance().getMusicTracker().stop();
+					MinecraftClient.getInstance().setScreen(new CreditsScreen(false, () -> MinecraftClient.getInstance().setScreen((TitleScreen) (Object) this)));
+				})
 			.dimensions(this.width / 2 - 100, y + spacingY * 2, 200, 20)
 			.build()
 		);
