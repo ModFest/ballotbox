@@ -223,7 +223,7 @@ public class VotingScreen extends SpruceScreen {
 			int bottom = getY() + getHeight();
 			int textY = (getY() * 2 + getHeight() - 9) / 2 + 1;
 			if (texture != null) {
-				context.drawTexture(RenderLayer::getGuiTextured, texture, left, getY() + 2, 16, 16, 0, 0, 16, 16, 16, 16);
+				context.drawTexture(RenderLayer::getGuiTextured, texture, left, getY() + 2, 16, 16, 16, 16, 16, 16, 16, 16);
 			}
 			if (textWidth <= getWidth()) {
 				context.drawCenteredTextWithShadow(client.textRenderer, getMessage(), left + getWidth() / 2, textY, 0xFFFFFFFF);
