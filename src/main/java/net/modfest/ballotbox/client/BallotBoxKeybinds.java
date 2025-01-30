@@ -23,7 +23,7 @@ public class BallotBoxKeybinds {
 		while (OPEN_VOTING_SCREEN.wasPressed() && BallotBoxClient.isEnabled(client)) {
 			if (!BallotBoxClient.isOpen()) {
 				client.inGameHud.setOverlayMessage(Text.literal("[BallotBox] ").formatted(Formatting.GREEN).append(Text.literal("Voting is unavailable! Voting closed %s.".formatted(BallotBox.relativeTime(BallotBoxClient.closingTime))).formatted(Formatting.RED)), false);
-            } else if (!BallotBoxClient.isAvailable()) {
+            } else if (!BallotBoxClient.hasVotingOptions) {
                 client.inGameHud.setOverlayMessage(Text.literal("[BallotBox] ").formatted(Formatting.GREEN).append(Text.literal("Voting is unavailable! Nothing to vote for.").formatted(Formatting.RED)), false);
             } else if (client.currentScreen == null) {
 				client.setScreen(new VotingScreen());

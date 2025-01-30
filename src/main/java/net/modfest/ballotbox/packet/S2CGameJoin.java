@@ -7,11 +7,11 @@ import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.util.Identifier;
 import net.modfest.ballotbox.BallotBox;
 
-public record S2CGameJoin(String closingTime, boolean available, int remainingVotes) implements CustomPayload {
+public record S2CGameJoin(String closingTime, boolean hasVotingOptions, int remainingVotes) implements CustomPayload {
 	public static final Id<S2CGameJoin> ID = new Id<>(Identifier.of(BallotBox.ID, "game_join"));
 	public static final PacketCodec<RegistryByteBuf, S2CGameJoin> CODEC = PacketCodec.tuple(
 		PacketCodecs.STRING, S2CGameJoin::closingTime,
-        PacketCodecs.BOOLEAN, S2CGameJoin::available,
+        PacketCodecs.BOOLEAN, S2CGameJoin::hasVotingOptions,
 		PacketCodecs.INTEGER, S2CGameJoin::remainingVotes,
 		S2CGameJoin::new
 	);
