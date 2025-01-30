@@ -14,11 +14,16 @@ import java.time.Instant;
 public class BallotBoxClient implements ClientModInitializer {
 	public static final Logger LOGGER = LoggerFactory.getLogger("%s-client".formatted(BallotBox.ID));
 	public static Instant closingTime = null;
+    public static boolean available = true;
 	public static int remainingVotes = 0;
 
 	public static boolean isEnabled(MinecraftClient client) {
 		return !client.isIntegratedServerRunning() && ClientPlayNetworking.canSend(OpenVoteScreen.ID);
 	}
+
+    public static boolean isAvailable() {
+        return available;
+    }
 
 	public static boolean isOpen() {
 		return closingTime == null || closingTime.isAfter(Instant.now());
@@ -30,6 +35,7 @@ public class BallotBoxClient implements ClientModInitializer {
 		ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
 			remainingVotes = 0;
 			closingTime = null;
+            available = true;
 		});
 		BallotBoxClientNetworking.init();
 		BallotBoxKeybinds.init();

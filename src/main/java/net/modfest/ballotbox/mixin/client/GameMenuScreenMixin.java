@@ -19,6 +19,7 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.modfest.ballotbox.BallotBox;
 import net.modfest.ballotbox.client.BallotBoxClient;
+import net.modfest.ballotbox.client.BallotBoxClientNetworking;
 import net.modfest.ballotbox.client.VotingScreen;
 import net.modfest.ballotbox.packet.OpenVoteScreen;
 import org.spongepowered.asm.mixin.Mixin;
@@ -36,8 +37,8 @@ public class GameMenuScreenMixin {
 		ballotbox$voteButton = ButtonWidget.builder(Text.of("Submission Voting"), b -> {
 			MinecraftClient.getInstance().setScreen(new VotingScreen());
 			ClientPlayNetworking.send(new OpenVoteScreen());
-		}).width(98).tooltip(BallotBoxClient.isOpen() ? null : Tooltip.of(Text.literal("Closed %s.".formatted(BallotBox.relativeTime(BallotBoxClient.closingTime))).formatted(Formatting.GRAY))).build();
-		ballotbox$voteButton.active = BallotBoxClient.isOpen();
+		}).width(98).tooltip(BallotBoxClient.isOpen() && BallotBoxClient.isAvailable() ? null : BallotBoxClient.isAvailable() ? Tooltip.of(Text.literal("Closed %s.".formatted(BallotBox.relativeTime(BallotBoxClient.closingTime))).formatted(Formatting.GRAY)) : Tooltip.of(Text.literal("Nothing to vote for.").formatted(Formatting.GRAY))).build();
+		ballotbox$voteButton.active = BallotBoxClient.isOpen() && BallotBoxClient.isAvailable();
 		return instance.add(ballotbox$voteButton);
 	}
 
@@ -60,8 +61,8 @@ public class GameMenuScreenMixin {
 	@Inject(method = "render", at = @At("TAIL"))
 	private void addReminder(DrawContext context, int mouseX, int mouseY, float delta, CallbackInfo ci) {
 		if (ballotbox$voteButton == null) return;
-		ballotbox$voteButton.active = BallotBoxClient.isOpen();
-		if (BallotBoxClient.isOpen() && BallotBoxClient.remainingVotes > 0) {
+        ballotbox$voteButton.active = BallotBoxClient.isOpen() && BallotBoxClient.isAvailable();
+		if (ballotbox$voteButton.active && BallotBoxClient.remainingVotes > 0) {
 			Text remainingText = Text.literal("%s vote%s available!".formatted(BallotBoxClient.remainingVotes, BallotBoxClient.remainingVotes > 1 ? "s" : "")).formatted(Formatting.GREEN);
 			context.drawText(MinecraftClient.getInstance().textRenderer, remainingText, ballotbox$voteButton.getX() - MinecraftClient.getInstance().textRenderer.getWidth(remainingText) - 2, ballotbox$voteButton.getY() + 2, 0xFFFFFFFF, true);
 			if (BallotBoxClient.closingTime != null) {

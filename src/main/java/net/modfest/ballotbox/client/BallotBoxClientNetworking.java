@@ -16,6 +16,7 @@ public class BallotBoxClientNetworking {
 
 	private static void handleGameJoin(S2CGameJoin packet, ClientPlayNetworking.Context context) {
 		BallotBoxClient.closingTime = BallotBox.parseClosingTime(packet.closingTime());
+        BallotBoxClient.available = packet.available();
 		BallotBoxClient.remainingVotes = packet.remainingVotes();
 	}
 

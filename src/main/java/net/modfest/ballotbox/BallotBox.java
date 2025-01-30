@@ -82,7 +82,7 @@ public class BallotBox implements ModInitializer {
 			VotingSelections selections = STATE.selections().get(handler.getPlayer().getUuid());
 			int totalVotes = BallotBoxPlatformClient.categories.values().stream().mapToInt(VotingCategory::limit).sum();
 			int remainingVotes = totalVotes - (selections == null ? 0 : selections.votes().size());
-			sender.sendPacket(new S2CGameJoin(CONFIG.closingTime.value(), remainingVotes));
+			sender.sendPacket(new S2CGameJoin(CONFIG.closingTime.value(), !STATE.selections().isEmpty(), remainingVotes));
 		}));
 		LOGGER.info("[BallotBox] Initialized!");
 	}
