@@ -87,7 +87,7 @@ public class BallotBoxCommands {
 			feedback.accept(Text.literal("[BallotBox] ").formatted(Formatting.GREEN).append(Text.literal("Voting is unavailable! Voting closed %s.".formatted(BallotBox.relativeTime(BallotBox.closingTime))).formatted(Formatting.RED)));
 			return 0;
 		}
-        if (BallotBox.STATE.selections().isEmpty()) {
+        if (BallotBoxPlatformClient.categories.isEmpty() || BallotBoxPlatformClient.options.isEmpty()) {
             feedback.accept(Text.literal("[BallotBox] ").formatted(Formatting.GREEN).append(Text.literal("Voting is unavailable! Nothing to vote for.").formatted(Formatting.RED)));
             return 0;
         }
