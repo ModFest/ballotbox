@@ -24,6 +24,8 @@ public class BallotBoxConfig extends ReflectiveConfig {
 	public final TrackedValue<Integer> awardLimit = value(8);
 	@Comment("The closing date, as an ISO local date time - or an empty string for none")
 	public final TrackedValue<String> closingTime = value("2024-12-16T12:00:00");
+	@Comment("Settings for the reminder on the pause screen")
+	public final ReminderSettings reminder_settings = new ReminderSettings();
 
 
 	public static class ButtonSettings extends Section {
@@ -43,6 +45,15 @@ public class BallotBoxConfig extends ReflectiveConfig {
 			this.target_button = list("", target.toArray(new String[0]));
 			this.apply_in_main_menu = value(mainMenu);
 			this.apply_in_pause_screen = value(pauseScreen);
+		}
+	}
+
+	public static class ReminderSettings extends Section {
+		public final TrackedValue<Integer> reminder_x_offset;
+		public final TrackedValue<Integer> reminder_y_offset;
+		public ReminderSettings() {
+			this.reminder_x_offset = value(0);
+			this.reminder_y_offset = value(0);
 		}
 	}
 }

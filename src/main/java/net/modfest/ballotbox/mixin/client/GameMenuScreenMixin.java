@@ -129,11 +129,13 @@ public abstract class GameMenuScreenMixin extends Screen {
 		if (ballotbox$voteButton == null) return;
 		ballotbox$voteButton.active = BallotBoxClient.isOpen();
 		if (BallotBoxClient.isOpen() && BallotBoxClient.remainingVotes > 0) {
+			int xOffset = BallotBox.CONFIG.reminder_settings.reminder_x_offset.value();
+			int yOffset = BallotBox.CONFIG.reminder_settings.reminder_y_offset.value();
 			Text remainingText = Text.literal("%s vote%s available!".formatted(BallotBoxClient.remainingVotes, BallotBoxClient.remainingVotes > 1 ? "s" : "")).formatted(Formatting.GREEN);
-			context.drawText(MinecraftClient.getInstance().textRenderer, remainingText, ballotbox$voteButton.getX() - MinecraftClient.getInstance().textRenderer.getWidth(remainingText) - 2, ballotbox$voteButton.getY() + 2, 0xFFFFFFFF, true);
+			context.drawText(MinecraftClient.getInstance().textRenderer, remainingText, ballotbox$voteButton.getX() - MinecraftClient.getInstance().textRenderer.getWidth(remainingText) - 2 + xOffset, ballotbox$voteButton.getY() + 2 + yOffset, 0xFFFFFFFF, true);
 			if (BallotBoxClient.closingTime != null) {
 				Text timeText = Text.literal("Closes %s.".formatted(BallotBox.relativeTime(BallotBoxClient.closingTime))).formatted(Formatting.YELLOW);
-				context.drawText(MinecraftClient.getInstance().textRenderer, timeText, ballotbox$voteButton.getX() - MinecraftClient.getInstance().textRenderer.getWidth(timeText) - 2, ballotbox$voteButton.getY() + 10, 0xFFFFFFFF, true);
+				context.drawText(MinecraftClient.getInstance().textRenderer, timeText, ballotbox$voteButton.getX() - MinecraftClient.getInstance().textRenderer.getWidth(timeText) - 2 + xOffset, ballotbox$voteButton.getY() + 10 + yOffset, 0xFFFFFFFF, true);
 			}
 		}
 	}
