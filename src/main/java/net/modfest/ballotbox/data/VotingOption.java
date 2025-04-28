@@ -14,11 +14,11 @@ public record VotingOption(String id, Optional<String> mod_id, String name, Stri
 		Platform.CODEC.fieldOf("platform").forGetter(VotingOption::platform)
 	).apply(instance, VotingOption::new));
 
-	public record Platform(String type, String project_id, String version_id) {
+	public record Platform(String type, Optional<String> project_id, Optional<String> homepage_url) {
 		public static final Codec<Platform> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 			Codec.STRING.fieldOf("type").forGetter(Platform::type),
-			Codec.STRING.fieldOf("project_id").forGetter(Platform::project_id),
-			Codec.STRING.fieldOf("version_id").forGetter(Platform::version_id)
+			Codec.STRING.optionalFieldOf("project_id").forGetter(Platform::project_id),
+			Codec.STRING.optionalFieldOf("homepage_url").forGetter(Platform::homepage_url)
 		).apply(instance, Platform::new));
 	}
 }

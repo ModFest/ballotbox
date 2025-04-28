@@ -94,7 +94,7 @@ public class VotingScreen extends SpruceScreen {
 		Map<String, List<VotingCategory>> typedCategories = categories.stream().collect(Collectors.groupingBy(VotingCategory::type));
 		typedCategories.entrySet().stream().sorted(Comparator.comparing(e -> CATEGORY_TYPES.contains(e.getKey()) ? CATEGORY_TYPES.indexOf(e.getKey()) : 99)).forEach(e -> {
 			e.getValue().forEach(category -> addCategoryTab(tabs, category));
-			if (tabs.getList().children().size() < categories.size() + typedCategories.keySet().size() - 1) tabs.addSeparatorEntry(null);
+			if (tabs.getList().children().size() < categories.size() + typedCategories.size() - 1) tabs.addSeparatorEntry(null);
 		});
 		tabs.getList().setBackground(EmptyBackground.EMPTY_BACKGROUND);
 		addSelectableChild(tabs);
@@ -188,7 +188,8 @@ public class VotingScreen extends SpruceScreen {
 				this.client.getTextureManager().registerTexture(modIconCache.get(option.id()), icon);
 			}
 			texture = modIconCache.get(option.id());
-			if (option.platform().type().equals("modrinth")) url = "https://modrinth.com/mod/%s".formatted(option.platform().project_id()); // Use project ID later
+			if (option.platform().type().equals("modrinth")) url = "https://modrinth.com/mod/%s".formatted(option.platform().project_id());
+			if (option.platform().type().equals("other")) url = option.platform().homepage_url().orElse(null);
 			setTooltip(url == null ? Text.literal(option.description()).formatted(Formatting.GRAY) : Text.literal(option.description()).formatted(Formatting.GRAY).append(Text.literal("\n")).append(Text.literal("Right-Click").formatted(Formatting.GOLD)).append(Text.literal(" to open the mod page.").formatted(Formatting.WHITE)));
 		}
 
