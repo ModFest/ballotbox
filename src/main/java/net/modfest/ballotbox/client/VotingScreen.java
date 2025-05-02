@@ -276,6 +276,7 @@ public class VotingScreen extends SpruceScreen {
 			category.prohibitions().ifPresent(prohibitions -> prohibitions.forEach(prohibition -> prohibitedIds.addAll(selections.get(prohibition))));
 			addChildren((containerWidth, containerHeight, widgetAdder) -> {
 				var optionList = new SpruceOptionListWidget(Position.of(this, 1, 0), containerWidth, containerHeight);
+				options.sort(Comparator.comparing(o -> o.name().toLowerCase()));
 				for (var optionPairs : Lists.partition(options, 2)) {
 					var listEntry = OptionEntryAccessor.ballotbox$create(optionList);
 					for (int i = 0; i < optionPairs.size(); i++) {
