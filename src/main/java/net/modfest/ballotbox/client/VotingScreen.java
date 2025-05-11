@@ -14,8 +14,10 @@ import dev.lambdaurora.spruceui.widget.container.tabbed.SpruceTabbedWidget;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.texture.NativeImageBackedTexture;
+import net.minecraft.client.texture.Sprite;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
@@ -47,15 +49,14 @@ public class VotingScreen extends SpruceScreen {
 		"community"
 	);
 
-	public static final Identifier LOCKUP_TEXTURE = Identifier.of("modfest", "textures/art/graphics/lockup-transparent.png");
-	public static final int LOCKUP_TEXTURE_WIDTH = 1101;
-	public static final int LOCKUP_TEXTURE_HEIGHT = 256;
+	public static final Identifier LOCKUP_TEXTURE = Identifier.of(BallotBox.ID, "emblem");
 
 	protected final Multimap<String, String> previousSelections = HashMultimap.create();
 	protected final Multimap<String, String> selections = HashMultimap.create();
 	protected List<VotingCategory> categories = new ArrayList<>();
 	protected List<VotingOption> options = new ArrayList<>();
 	protected boolean loaded = false;
+	protected Sprite lockupSprite = null;
 
 	protected int sidePanelWidth;
 	protected int sidePanelVerticalPadding;
@@ -70,6 +71,7 @@ public class VotingScreen extends SpruceScreen {
 	@Override
 	protected void init() {
 		super.init();
+		this.lockupSprite = MinecraftClient.getInstance().getGuiAtlasManager().getSprite(LOCKUP_TEXTURE);
 		if (loaded) {
 			initLoaded();
 		}
@@ -109,9 +111,12 @@ public class VotingScreen extends SpruceScreen {
 	}
 
 	public void renderLockup(DrawContext context) {
+		if (lockupSprite == null) return;
 		RenderSystem.enableBlend();
-		int drawHeight = sidePanelWidth * LOCKUP_TEXTURE_HEIGHT / LOCKUP_TEXTURE_WIDTH;
-		context.drawTexture(LOCKUP_TEXTURE, 0, (sidePanelVerticalPadding - drawHeight) / 2, sidePanelWidth, drawHeight, 0, 0, LOCKUP_TEXTURE_WIDTH, LOCKUP_TEXTURE_HEIGHT, LOCKUP_TEXTURE_WIDTH, LOCKUP_TEXTURE_HEIGHT);
+		int texHeight = lockupSprite.getContents().getHeight();
+		int texWidth = lockupSprite.getContents().getWidth();
+		int drawHeight = sidePanelWidth * texHeight / texWidth;
+		context.drawGuiTexture(LOCKUP_TEXTURE, 0, (sidePanelVerticalPadding - drawHeight) / 2, sidePanelWidth, drawHeight);
 		RenderSystem.disableBlend();
 	}
 

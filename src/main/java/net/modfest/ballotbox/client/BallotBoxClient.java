@@ -38,7 +38,7 @@ public class BallotBoxClient implements ClientModInitializer {
 		BallotBoxKeybinds.init();
 
 
-		var lateModify = Identifier.of("ballotbox", "late");
+		var lateModify = Identifier.of(BallotBox.ID, "late");
 		ScreenEvents.AFTER_INIT.addPhaseOrdering(Event.DEFAULT_PHASE, lateModify);
 		ScreenEvents.AFTER_INIT.register(lateModify, (client, screen, scaledWidth, scaledHeight) -> {
 			if (screen instanceof ApplyModifications applyModifications) applyModifications.ballotbox$applyModifications();
