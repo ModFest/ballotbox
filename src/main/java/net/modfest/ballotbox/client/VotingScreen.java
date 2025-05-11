@@ -193,7 +193,7 @@ public class VotingScreen extends SpruceScreen {
 				this.client.getTextureManager().registerTexture(modIconCache.get(option.id()), icon);
 			}
 			texture = modIconCache.get(option.id());
-			if (option.platform().type().equals("modrinth")) url = "https://modrinth.com/mod/%s".formatted(option.platform().project_id());
+			if (option.platform().type().equals("modrinth")) url = option.platform().project_id().map("https://modrinth.com/mod/%s"::formatted).orElse(null);
 			if (option.platform().type().equals("other")) url = option.platform().homepage_url().orElse(null);
 			setTooltip(url == null ? Text.literal(option.description()).formatted(Formatting.GRAY) : Text.literal(option.description()).formatted(Formatting.GRAY).append(Text.literal("\n")).append(Text.literal("Right-Click").formatted(Formatting.GOLD)).append(Text.literal(" to open the mod page.").formatted(Formatting.WHITE)));
 		}
