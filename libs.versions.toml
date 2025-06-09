@@ -10,6 +10,7 @@ yarn = "1.21.4+build.8"
 fapi = "0.115.0+1.21.4"
 
 spruceui = "6.2.0+1.21.3"
+modmenu = "13.0.3"
 
 [plugins]
 loom = { id = "fabric-loom", version.ref = "loom" }
@@ -24,3 +25,4 @@ yarn = { group = "net.fabricmc", name = "yarn", version.ref = "yarn" }
 fapi = { group = "net.fabricmc.fabric-api", name = "fabric-api", version.ref = "fapi" }
 
 spruceui = { group = "dev.lambdaurora", name = "spruceui", version.ref = "spruceui" }
+modmenu = { group = "com.terraformersmc", name = "modmenu", version.ref = "modmenu" }

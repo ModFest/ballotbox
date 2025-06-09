@@ -3,7 +3,10 @@ package net.modfest.ballotbox.client;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
+import net.fabricmc.fabric.api.event.Event;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.util.Identifier;
 import net.modfest.ballotbox.BallotBox;
 import net.modfest.ballotbox.packet.OpenVoteScreen;
 import org.slf4j.Logger;
@@ -35,5 +38,12 @@ public class BallotBoxClient implements ClientModInitializer {
 		});
 		BallotBoxClientNetworking.init();
 		BallotBoxKeybinds.init();
+
+
+		var lateModify = Identifier.of(BallotBox.ID, "late");
+		ScreenEvents.AFTER_INIT.addPhaseOrdering(Event.DEFAULT_PHASE, lateModify);
+		ScreenEvents.AFTER_INIT.register(lateModify, (client, screen, scaledWidth, scaledHeight) -> {
+			if (screen instanceof ApplyModifications applyModifications) applyModifications.ballotbox$applyModifications();
+		});
 	}
 }

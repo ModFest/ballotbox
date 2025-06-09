@@ -27,6 +27,7 @@ dependencies {
 	modImplementation libs.fapi
 
 	modImplementation libs.spruceui
+	modRuntimeOnly libs.modmenu
 	include libs.spruceui
 }
 

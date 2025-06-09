@@ -14,9 +14,11 @@ import dev.lambdaurora.spruceui.widget.container.tabbed.SpruceTabbedWidget;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.texture.NativeImageBackedTexture;
+import net.minecraft.client.texture.Sprite;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
@@ -48,7 +50,7 @@ public class VotingScreen extends SpruceScreen {
 		"community"
 	);
 
-	public static final Identifier LOCKUP_TEXTURE = Identifier.of("modfest", "textures/art/graphics/lockup-transparent.png");
+	public static final Identifier LOCKUP_TEXTURE = Identifier.of(BallotBox.ID, "emblem");
 	public static final int LOCKUP_TEXTURE_WIDTH = 1101;
 	public static final int LOCKUP_TEXTURE_HEIGHT = 256;
 
@@ -57,6 +59,7 @@ public class VotingScreen extends SpruceScreen {
 	protected List<VotingCategory> categories = new ArrayList<>();
 	protected List<VotingOption> options = new ArrayList<>();
 	protected boolean loaded = false;
+	protected Sprite lockupSprite = null;
 
 	protected int sidePanelWidth;
 	protected int sidePanelVerticalPadding;
@@ -71,6 +74,7 @@ public class VotingScreen extends SpruceScreen {
 	@Override
 	protected void init() {
 		super.init();
+		this.lockupSprite = MinecraftClient.getInstance().getGuiAtlasManager().getSprite(LOCKUP_TEXTURE);
 		if (loaded) {
 			initLoaded();
 		}
@@ -95,7 +99,7 @@ public class VotingScreen extends SpruceScreen {
 		Map<String, List<VotingCategory>> typedCategories = categories.stream().collect(Collectors.groupingBy(VotingCategory::type));
 		typedCategories.entrySet().stream().sorted(Comparator.comparing(e -> CATEGORY_TYPES.contains(e.getKey()) ? CATEGORY_TYPES.indexOf(e.getKey()) : 99)).forEach(e -> {
 			e.getValue().forEach(category -> addCategoryTab(tabs, category));
-			if (tabs.getList().children().size() < categories.size() + typedCategories.keySet().size() - 1) tabs.addSeparatorEntry(null);
+			if (tabs.getList().children().size() < categories.size() + typedCategories.size() - 1) tabs.addSeparatorEntry(null);
 		});
 		tabs.getList().setBackground(EmptyBackground.EMPTY_BACKGROUND);
 		addSelectableChild(tabs);
@@ -110,8 +114,11 @@ public class VotingScreen extends SpruceScreen {
 	}
 
 	public void renderLockup(DrawContext context) {
+		if (lockupSprite == null) return;
 		RenderSystem.enableBlend();
-		int drawHeight = sidePanelWidth * LOCKUP_TEXTURE_HEIGHT / LOCKUP_TEXTURE_WIDTH;
+		int texHeight = lockupSprite.getContents().getHeight();
+		int texWidth = lockupSprite.getContents().getWidth();
+		int drawHeight = sidePanelWidth * texHeight / texWidth;
 		context.drawTexture(RenderLayer::getGuiTextured, LOCKUP_TEXTURE, 0, (sidePanelVerticalPadding - drawHeight) / 2, sidePanelWidth, drawHeight, 0, 0, LOCKUP_TEXTURE_WIDTH, LOCKUP_TEXTURE_HEIGHT, LOCKUP_TEXTURE_WIDTH, LOCKUP_TEXTURE_HEIGHT);
 		RenderSystem.disableBlend();
 	}
@@ -190,7 +197,8 @@ public class VotingScreen extends SpruceScreen {
 				this.client.getTextureManager().registerTexture(modIconCache.get(option.id()), icon);
 			}
 			texture = modIconCache.get(option.id());
-			if (option.platform().type().equals("modrinth")) url = "https://modrinth.com/mod/%s".formatted(option.platform().project_id()); // Use project ID later
+			if (option.platform().type().equals("modrinth")) url = option.platform().project_id().map("https://modrinth.com/mod/%s"::formatted).orElse(null);
+			if (option.platform().type().equals("other")) url = option.platform().homepage_url().orElse(null);
 			setTooltip(url == null ? Text.literal(option.description()).formatted(Formatting.GRAY) : Text.literal(option.description()).formatted(Formatting.GRAY).append(Text.literal("\n")).append(Text.literal("Right-Click").formatted(Formatting.GOLD)).append(Text.literal(" to open the mod page.").formatted(Formatting.WHITE)));
 		}
 
@@ -272,6 +280,7 @@ public class VotingScreen extends SpruceScreen {
 			category.prohibitions().ifPresent(prohibitions -> prohibitions.forEach(prohibition -> prohibitedIds.addAll(selections.get(prohibition))));
 			addChildren((containerWidth, containerHeight, widgetAdder) -> {
 				var optionList = new SpruceOptionListWidget(Position.of(this, 1, 0), containerWidth, containerHeight);
+				options.sort(Comparator.comparing(o -> o.name().toLowerCase()));
 				for (var optionPairs : Lists.partition(options, 2)) {
 					var listEntry = OptionEntryAccessor.ballotbox$create(optionList);
 					for (int i = 0; i < optionPairs.size(); i++) {
