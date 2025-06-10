@@ -9,7 +9,7 @@ import java.util.List;
 
 public class BallotBoxConfig extends ReflectiveConfig {
 	@Comment("Whether to add a voting button")
-	public final ButtonSettings voting_button = new ButtonSettings(List.of("menu.feedback", "menu.sendFeedback"), false, true);
+	public final ButtonSettings voting_button = new ButtonSettings(List.of("menu.playerReporting"), false, true);
 	@Comment("Whether to replace the bug report button with another link")
 	public final ButtonSettings custom_link_button = new ButtonSettings(List.of("menu.reportBugs"), false, true);
 	@Comment("The text to use to replace the bug report button")
@@ -17,13 +17,13 @@ public class BallotBoxConfig extends ReflectiveConfig {
 	@Comment("The link to use to replace the bug report button")
 	public final TrackedValue<String> custom_link_url = value("https://discord.gg/gn543Ee");
 	@Comment("Whether to add a credits button")
-	public final ButtonSettings credits_button = new ButtonSettings(List.of("menu.online", "menu.playerReporting"), true, true);
+	public final ButtonSettings credits_button = new ButtonSettings(List.of("menu.online"), true, false);
 	@Comment("The text to use for replacement credits but tons button")
 	public final TrackedValue<String> credits_text = value("Modpack Credits");
 	@Comment("The number of top results to show when displaying voting results")
 	public final TrackedValue<Integer> awardLimit = value(8);
 	@Comment("The closing date, as an ISO local date time - or an empty string for none")
-	public final TrackedValue<String> closingTime = value("2024-12-16T12:00:00");
+	public final TrackedValue<String> closingTime = value("");
 	@Comment("Settings for the reminder on the pause screen")
 	public final ReminderSettings reminder_settings = new ReminderSettings();
 
