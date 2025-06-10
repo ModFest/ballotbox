@@ -12,6 +12,8 @@ fapi = "0.115.0+1.21.4"
 spruceui = "6.2.0+1.21.3"
 modmenu = "13.0.3"
 
+sresld = "1.0.0+1.21.1"
+
 [plugins]
 loom = { id = "fabric-loom", version.ref = "loom" }
 minotaur = { id = "com.modrinth.minotaur", version.ref = "minotaur" }
@@ -26,3 +28,5 @@ fapi = { group = "net.fabricmc.fabric-api", name = "fabric-api", version.ref = "
 
 spruceui = { group = "dev.lambdaurora", name = "spruceui", version.ref = "spruceui" }
 modmenu = { group = "com.terraformersmc", name = "modmenu", version.ref = "modmenu" }
+
+sresld = { group = "maven.modrinth", name = "simple-resource-loader", version.ref = "sresld" }
