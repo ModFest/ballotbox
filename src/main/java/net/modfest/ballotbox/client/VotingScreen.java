@@ -3,7 +3,6 @@ package net.modfest.ballotbox.client;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
-import com.mojang.blaze3d.systems.RenderSystem;
 import dev.lambdaurora.spruceui.Position;
 import dev.lambdaurora.spruceui.background.EmptyBackground;
 import dev.lambdaurora.spruceui.screen.SpruceScreen;
@@ -115,12 +114,10 @@ public class VotingScreen extends SpruceScreen {
 
 	public void renderLockup(DrawContext context) {
 		if (lockupSprite == null) return;
-		RenderSystem.enableBlend();
 		int texHeight = lockupSprite.getContents().getHeight();
 		int texWidth = lockupSprite.getContents().getWidth();
 		int drawHeight = sidePanelWidth * texHeight / texWidth;
 		context.drawTexture(RenderLayer::getGuiTextured, LOCKUP_TEXTURE, 0, (sidePanelVerticalPadding - drawHeight) / 2, sidePanelWidth, drawHeight, 0, 0, LOCKUP_TEXTURE_WIDTH, LOCKUP_TEXTURE_HEIGHT, LOCKUP_TEXTURE_WIDTH, LOCKUP_TEXTURE_HEIGHT);
-		RenderSystem.disableBlend();
 	}
 
 	@Override
