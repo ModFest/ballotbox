@@ -5,10 +5,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.GameMenuScreen;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.gui.widget.GridWidget;
-import net.minecraft.client.gui.widget.SimplePositioningWidget;
-import net.minecraft.client.gui.widget.TexturedButtonWidget;
+import net.minecraft.client.gui.widget.*;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.modfest.ballotbox.BallotBox;
@@ -47,6 +44,16 @@ public abstract class GameMenuScreenMixin extends Screen {
 						if (settings == BallotBox.CONFIG.voting_button) {
 							ballotbox$voteButton = button;
 						}
+						
+						// Workaround for Mod Menu's atrociously invasive Mods button
+						if (child instanceof ButtonWidget buttonWidget && buttonWidget.getMessage().getString().equals(Text.translatable("menu.reportBugs").getString())) {
+							for (var child1 : children) {
+								if (child1.getClass().getName().equals("com.terraformersmc.modmenu.gui.widget.ModMenuButtonWidget")) {
+									((ClickableWidgetAccessor) child1).setWidth(button.getWidth());
+								}
+							}
+						}
+						
 						children.set(i, button);
 						break;
 					}
