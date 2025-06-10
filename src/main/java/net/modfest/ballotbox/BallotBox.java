@@ -25,7 +25,6 @@ public class BallotBox implements ModInitializer {
 	public static final String ID = "ballotbox";
 	public static final Logger LOGGER = LoggerFactory.getLogger(ID);
 	public static final BallotBoxConfig CONFIG = BallotBoxConfig.createToml(FabricLoader.getInstance().getConfigDir(), "", ID, BallotBoxConfig.class);
-	public static final String STATE_KEY = "ballotbox_ballots";
 	public static BallotState STATE = null;
 	public static Instant closingTime = null;
 
@@ -66,7 +65,7 @@ public class BallotBox implements ModInitializer {
 		CommandRegistrationCallback.EVENT.register(BallotBoxCommands::register);
 		ServerWorldEvents.LOAD.register(((server, world) -> {
 			if (world.getRegistryKey() == World.OVERWORLD) {
-				STATE = world.getPersistentStateManager().getOrCreate(BallotState.getPersistentStateType(), STATE_KEY);
+				STATE = world.getPersistentStateManager().getOrCreate(BallotState.TYPE);
 			}
 		}));
 		ServerLifecycleEvents.SERVER_STARTED.register((server -> {
@@ -82,7 +81,7 @@ public class BallotBox implements ModInitializer {
 			VotingSelections selections = STATE.selections().get(handler.getPlayer().getUuid());
 			int totalVotes = BallotBoxPlatformClient.categories.values().stream().mapToInt(VotingCategory::limit).sum();
 			int remainingVotes = totalVotes - (selections == null ? 0 : selections.votes().size());
-			sender.sendPacket(new S2CGameJoin(CONFIG.closingTime.value(), remainingVotes));
+			sender.sendPacket(new S2CGameJoin(CONFIG.closingTime.value(), !BallotBoxPlatformClient.categories.isEmpty() && !BallotBoxPlatformClient.options.isEmpty(), remainingVotes));
 		}));
 		LOGGER.info("[BallotBox] Initialized!");
 	}

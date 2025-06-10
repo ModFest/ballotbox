@@ -21,7 +21,7 @@ import java.util.Objects;
 public class ModMetaUtil {
 	private static final Map<Path, NativeImageBackedTexture> modIconCache = new HashMap<>();
 
-	public static NativeImageBackedTexture createIcon(ModContainer iconSource, String iconPath) {
+	public static NativeImageBackedTexture createIcon(String name, ModContainer iconSource, String iconPath) {
 		try {
 			Path path = iconSource.getPath(iconPath);
 			NativeImageBackedTexture cachedIcon = modIconCache.get(path);
@@ -35,7 +35,7 @@ public class ModMetaUtil {
 			try (InputStream inputStream = Files.newInputStream(path)) {
 				NativeImage image = NativeImage.read(Objects.requireNonNull(inputStream));
 				Validate.validState(image.getHeight() == image.getWidth(), "Must be square icon");
-				NativeImageBackedTexture tex = new NativeImageBackedTexture(image);
+				NativeImageBackedTexture tex = new NativeImageBackedTexture(() -> name, image);
 				modIconCache.put(path, tex);
 				return tex;
 			}
@@ -60,6 +60,7 @@ public class ModMetaUtil {
 
 	public static NativeImageBackedTexture getMissingIcon() {
 		return createIcon(
+			"Missing Icon",
 			FabricLoader.getInstance()
 				.getModContainer(BallotBox.ID)
 				.orElseThrow(() -> new RuntimeException("Cannot get ModContainer for Fabric mod with id " + BallotBox.ID)),
@@ -75,7 +76,7 @@ public class ModMetaUtil {
 		ModContainer iconSource = FabricLoader.getInstance()
 			.getModContainer(modId)
 			.orElseThrow(() -> new RuntimeException("Cannot get ModContainer for Fabric mod with id " + finalIconSourceId));
-		NativeImageBackedTexture icon = createIcon(iconSource, iconPath);
+		NativeImageBackedTexture icon = createIcon(mod.getMetadata().getName() + " (Mod Icon)", iconSource, iconPath);
 		if (icon == null) return getMissingIcon();
 		return icon;
 	}

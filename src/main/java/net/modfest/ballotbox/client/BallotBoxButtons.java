@@ -4,12 +4,12 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ConfirmLinkScreen;
 import net.minecraft.client.gui.screen.CreditsScreen;
-import net.minecraft.client.gui.screen.GameMenuScreen;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.tooltip.Tooltip;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.client.gui.widget.Widget;
+import net.minecraft.client.sound.MusicInstance;
 import net.minecraft.sound.MusicType;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableTextContent;
@@ -38,7 +38,7 @@ public class BallotBoxButtons {
 		list.add(new Pair<>(BallotBox.CONFIG.credits_button, (screen) -> ButtonWidget.builder(Text.of(BallotBox.CONFIG.credits_text.value()), b -> {
 			MinecraftClient.getInstance().setScreen(new CreditsScreen(false, () -> MinecraftClient.getInstance().setScreen(screen)));
 			MinecraftClient.getInstance().getMusicTracker().stop();
-			MinecraftClient.getInstance().getMusicTracker().play(MusicType.CREDITS);
+			MinecraftClient.getInstance().getMusicTracker().play(new MusicInstance(MusicType.CREDITS));
 		})));
 
 		return list;

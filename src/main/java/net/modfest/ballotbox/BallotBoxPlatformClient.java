@@ -5,6 +5,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.JsonOps;
+import net.minecraft.resource.Resource;
 import net.minecraft.resource.ResourceManager;
 import net.minecraft.util.Identifier;
 import net.modfest.ballotbox.data.VotingCategory;
@@ -14,6 +15,7 @@ import net.modfest.ballotbox.data.VotingSelections;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -29,9 +31,25 @@ public class BallotBoxPlatformClient {
 	public static void init(ResourceManager resourceManager) {
 		try {
 			categories.clear();
+            Optional<Resource> categoriesData = resourceManager.getResource(CATEGORIES_DATA);
+            if (categoriesData.isPresent()) {
+	            GSON.fromJson(new BufferedReader(new InputStreamReader(resourceManager.getResourceOrThrow(CATEGORIES_DATA).getInputStream())), JsonArray.class).asList().stream().map(e -> VotingCategory.CODEC.decode(JsonOps.INSTANCE, e).mapOrElse(Pair::getFirst, a -> null)).filter(Objects::nonNull).forEach(category -> categories.put(category.id(), category));
+            }
 			options.clear();
-			GSON.fromJson(new BufferedReader(new InputStreamReader(resourceManager.getResourceOrThrow(CATEGORIES_DATA).getInputStream())), JsonArray.class).asList().stream().map(e -> VotingCategory.CODEC.decode(JsonOps.INSTANCE, e).mapOrElse(Pair::getFirst, a -> null)).filter(Objects::nonNull).forEach(category -> categories.put(category.id(), category));
-			GSON.fromJson(new BufferedReader(new InputStreamReader(resourceManager.getResourceOrThrow(OPTIONS_DATA).getInputStream())), JsonArray.class).asList().stream().map(e -> VotingOption.CODEC.decode(JsonOps.INSTANCE, e).mapOrElse(Pair::getFirst, a -> null)).filter(Objects::nonNull).forEach(option -> options.put(option.id(), option));
+			Optional<Resource> optionsData = resourceManager.getResource(OPTIONS_DATA);
+			if (optionsData.isPresent()) {
+				GSON.fromJson(
+					new BufferedReader(new InputStreamReader(resourceManager.getResourceOrThrow(
+						OPTIONS_DATA).getInputStream())),
+					JsonArray.class
+				).asList().stream().map(e -> VotingOption.CODEC.decode(
+					JsonOps.INSTANCE,
+					e
+				).mapOrElse(
+					Pair::getFirst,
+					a -> null
+				)).filter(Objects::nonNull).forEach(option -> options.put(option.id(), option));
+			}
 		} catch (Exception e) {
 			BallotBox.LOGGER.info("[BallotBox] Failed to load ballotbox data!", e);
 		}

@@ -3,7 +3,6 @@ package net.modfest.ballotbox.client;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
-import com.mojang.blaze3d.systems.RenderSystem;
 import dev.lambdaurora.spruceui.Position;
 import dev.lambdaurora.spruceui.background.EmptyBackground;
 import dev.lambdaurora.spruceui.screen.SpruceScreen;
@@ -16,6 +15,7 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.texture.NativeImageBackedTexture;
 import net.minecraft.client.texture.Sprite;
 import net.minecraft.text.Text;
@@ -50,6 +50,8 @@ public class VotingScreen extends SpruceScreen {
 	);
 
 	public static final Identifier LOCKUP_TEXTURE = Identifier.of(BallotBox.ID, "emblem");
+	public static final int LOCKUP_TEXTURE_WIDTH = 1101;
+	public static final int LOCKUP_TEXTURE_HEIGHT = 256;
 
 	protected final Multimap<String, String> previousSelections = HashMultimap.create();
 	protected final Multimap<String, String> selections = HashMultimap.create();
@@ -112,12 +114,10 @@ public class VotingScreen extends SpruceScreen {
 
 	public void renderLockup(DrawContext context) {
 		if (lockupSprite == null) return;
-		RenderSystem.enableBlend();
 		int texHeight = lockupSprite.getContents().getHeight();
 		int texWidth = lockupSprite.getContents().getWidth();
 		int drawHeight = sidePanelWidth * texHeight / texWidth;
-		context.drawGuiTexture(LOCKUP_TEXTURE, 0, (sidePanelVerticalPadding - drawHeight) / 2, sidePanelWidth, drawHeight);
-		RenderSystem.disableBlend();
+		context.drawTexture(RenderLayer::getGuiTextured, LOCKUP_TEXTURE, 0, (sidePanelVerticalPadding - drawHeight) / 2, sidePanelWidth, drawHeight, 0, 0, LOCKUP_TEXTURE_WIDTH, LOCKUP_TEXTURE_HEIGHT, LOCKUP_TEXTURE_WIDTH, LOCKUP_TEXTURE_HEIGHT);
 	}
 
 	@Override
@@ -184,6 +184,7 @@ public class VotingScreen extends SpruceScreen {
 			this.parent = parent;
 			selected = selections.containsEntry(category.id(), option.id());
 			this.prohibited = prohibited;
+			this.active = prohibited;
 			if (!modIconCache.containsKey(option.id())) {
 				modIconCache.put(option.id(), Identifier.of(BallotBox.ID, option.id() + "_icon"));
 				Optional<ModContainer> mod = FabricLoader.getInstance().getModContainer(option.mod_id().isPresent() ? option.mod_id().get() : option.id())
@@ -199,13 +200,8 @@ public class VotingScreen extends SpruceScreen {
 		}
 
 		@Override
-		public boolean isActive() {
-			return !prohibited && super.isActive();
-		}
-
-		@Override
 		public Optional<Text> getTooltip() {
-			return isActive() ? super.getTooltip() : prohibited ? Optional.of(Text.literal("Prohibited by another category!").formatted(Formatting.GRAY)) : Optional.of(Text.literal("You've reached the category vote limit!").formatted(Formatting.GRAY));
+			return active ? super.getTooltip() : prohibited ? Optional.of(Text.literal("Prohibited by another category!").formatted(Formatting.GRAY)) : Optional.of(Text.literal("You've reached the category vote limit!").formatted(Formatting.GRAY));
 		}
 
 		@Override
@@ -232,7 +228,7 @@ public class VotingScreen extends SpruceScreen {
 			int bottom = getY() + getHeight();
 			int textY = (getY() * 2 + getHeight() - 9) / 2 + 1;
 			if (texture != null) {
-				context.drawTexture(texture, left, getY() + 2, 16, 16, 0, 0, 16, 16, 16, 16);
+				context.drawTexture(RenderLayer::getGuiTextured, texture, left, getY() + 2, 16, 16, 16, 16, 16, 16, 16, 16);
 			}
 			if (textWidth <= getWidth()) {
 				context.drawCenteredTextWithShadow(client.textRenderer, getMessage(), left + getWidth() / 2, textY, 0xFFFFFFFF);
@@ -252,7 +248,7 @@ public class VotingScreen extends SpruceScreen {
 		protected void renderWidget(DrawContext context, int mouseX, int mouseY, float delta) {
 			super.renderWidget(context, mouseX, mouseY, delta);
 			if (selected) {
-				context.drawTexture(CHECKMARK_TEXTURE, getX() + getWidth() - 11, getY() + getHeight() - 9, 0, 0, 7, 6, 7, 6);
+				context.drawTexture(RenderLayer::getGuiTextured, CHECKMARK_TEXTURE, getX() + getWidth() - 11, getY() + getHeight() - 9, 0, 0, 7, 6, 7, 6);
 			}
 		}
 

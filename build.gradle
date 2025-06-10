@@ -14,6 +14,10 @@ repositories {
 	maven { url "https://maven.gegy.dev" }
 	maven { url "https://maven.quiltmc.org/repository/release" }
 	maven { url "https://repo.sleeping.town/" }
+	exclusiveContent {
+		forRepository { maven { url "https://api.modrinth.com/maven" } }
+		filter { includeGroup "maven.modrinth" }
+	}
 }
 
 dependencies {
@@ -28,7 +32,24 @@ dependencies {
 
 	modImplementation libs.spruceui
 	modRuntimeOnly libs.modmenu
+	modRuntimeOnly libs.sresld
 	include libs.spruceui
+}
+
+loom {
+	mods {
+		register(modId) {
+			sourceSet(sourceSets["main"])
+			sourceSet(sourceSets["test"])
+		}
+	}
+}
+
+sourceSets {
+	named("main") {
+		runtimeClasspath += sourceSets["test"].runtimeClasspath
+		runtimeClasspath += sourceSets["test"].output
+	}
 }
 
 processResources {
