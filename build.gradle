@@ -36,6 +36,22 @@ dependencies {
 	include libs.spruceui
 }
 
+loom {
+	mods {
+		register(modId) {
+			sourceSet(sourceSets["main"])
+			sourceSet(sourceSets["test"])
+		}
+	}
+}
+
+sourceSets {
+	named("main") {
+		runtimeClasspath += sourceSets["test"].runtimeClasspath
+		runtimeClasspath += sourceSets["test"].output
+	}
+}
+
 processResources {
 	final Map<String, String> meta = [
 		version       : version,

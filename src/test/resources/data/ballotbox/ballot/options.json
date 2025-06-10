@@ -1,0 +1,32 @@
+[
+	{
+		"id": "fabric-api",
+		"mod_id": "fabric-api",
+		"name": "Fabric API",
+		"description": "Lightweight and modular API providing common hooks and intercompatibility measures utilized by mods using the Fabric toolchain.",
+		"platform": {
+			"type": "modrinth",
+			"project_id": "P7dR8mSH"
+		}
+	},
+	{
+		"id": "modmenu",
+		"mod_id": "modmenu",
+		"name": "Mod Menu",
+		"description": "Adds a mod menu to view the list of mods you have installed.",
+		"platform": {
+			"type": "modrinth",
+			"project_id": "mOgUt4GM"
+		}
+	},
+	{
+		"id": "simple-resource-loader",
+		"mod_id": "simple-resource-loader",
+		"name": "Simple Resource Loader",
+		"description": "Simple global / modpack resource pack and data pack loader. No configuration, just few folders.",
+		"platform": {
+			"type": "modrinth",
+			"project_id": "5e65FGXQ"
+		}
+	}
+]

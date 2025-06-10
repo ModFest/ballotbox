@@ -1,0 +1,16 @@
+[
+	{
+		"id": "most_aura",
+		"name": "Most Aura",
+		"description": "Projects showcased with the most aura.",
+		"type": "community",
+		"limit": 10
+	},
+	{
+		"id": "best_rizz",
+		"name": "Best Rizz",
+		"description": "The project that has the best rizz.",
+		"type": "community",
+		"limit": 1
+	}
+]
