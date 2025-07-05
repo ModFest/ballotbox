@@ -14,6 +14,7 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * Liberally stolen from ModMenu. Thanks ModMenu!
@@ -23,7 +24,15 @@ public class ModMetaUtil {
 
 	public static NativeImageBackedTexture createIcon(ModContainer iconSource, String iconPath) {
 		try {
-			Path path = iconSource.getPath(iconPath);
+			Optional<Path> optionalPath = iconSource.findPath(iconPath);
+
+			if(optionalPath.isEmpty()) {
+				BallotBox.LOGGER.warn("Missing icon for source {}", iconSource);
+				return null;
+			}
+
+			Path path = optionalPath.get();
+
 			NativeImageBackedTexture cachedIcon = modIconCache.get(path);
 			if (cachedIcon != null) {
 				return cachedIcon;
@@ -35,7 +44,7 @@ public class ModMetaUtil {
 			try (InputStream inputStream = Files.newInputStream(path)) {
 				NativeImage image = NativeImage.read(Objects.requireNonNull(inputStream));
 				Validate.validState(image.getHeight() == image.getWidth(), "Must be square icon");
-				NativeImageBackedTexture tex = new NativeImageBackedTexture(image);
+				NativeImageBackedTexture tex = new NativeImageBackedTexture(() -> iconPath, image);
 				modIconCache.put(path, tex);
 				return tex;
 			}

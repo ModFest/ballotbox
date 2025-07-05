@@ -3,10 +3,11 @@ package net.modfest.ballotbox.client;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
-import com.mojang.blaze3d.systems.RenderSystem;
 import dev.lambdaurora.spruceui.Position;
 import dev.lambdaurora.spruceui.background.EmptyBackground;
+import dev.lambdaurora.spruceui.render.SpruceGuiGraphics;
 import dev.lambdaurora.spruceui.screen.SpruceScreen;
+import dev.lambdaurora.spruceui.tooltip.TooltipData;
 import dev.lambdaurora.spruceui.widget.SpruceButtonWidget;
 import dev.lambdaurora.spruceui.widget.container.SpruceContainerWidget;
 import dev.lambdaurora.spruceui.widget.container.SpruceOptionListWidget;
@@ -15,6 +16,7 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gl.RenderPipelines;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.texture.NativeImageBackedTexture;
 import net.minecraft.client.texture.Sprite;
@@ -31,6 +33,7 @@ import net.modfest.ballotbox.mixin.client.OptionEntryAccessor;
 import net.modfest.ballotbox.packet.C2SUpdateVote;
 import net.modfest.ballotbox.packet.S2CVoteScreenData;
 import net.modfest.ballotbox.util.ModMetaUtil;
+import org.jetbrains.annotations.NotNull;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
@@ -96,10 +99,12 @@ public class VotingScreen extends SpruceScreen {
 		Map<String, List<VotingCategory>> typedCategories = categories.stream().collect(Collectors.groupingBy(VotingCategory::type));
 		typedCategories.entrySet().stream().sorted(Comparator.comparing(e -> CATEGORY_TYPES.contains(e.getKey()) ? CATEGORY_TYPES.indexOf(e.getKey()) : 99)).forEach(e -> {
 			e.getValue().forEach(category -> addCategoryTab(tabs, category));
-			if (tabs.getList().children().size() < categories.size() + typedCategories.size() - 1) tabs.addSeparatorEntry(null);
+			if (tabs.getList().children().size() < categories.size() + typedCategories.size() - 1) {
+				tabs.addSeparatorEntry(null);
+			}
 		});
 		tabs.getList().setBackground(EmptyBackground.EMPTY_BACKGROUND);
-		addSelectableChild(tabs);
+		addDrawableChild(tabs);
 	}
 
 	@Override
@@ -112,24 +117,21 @@ public class VotingScreen extends SpruceScreen {
 
 	public void renderLockup(DrawContext context) {
 		if (lockupSprite == null) return;
-		RenderSystem.enableBlend();
 		int texHeight = lockupSprite.getContents().getHeight();
 		int texWidth = lockupSprite.getContents().getWidth();
 		int drawHeight = sidePanelWidth * texHeight / texWidth;
-		context.drawGuiTexture(LOCKUP_TEXTURE, 0, (sidePanelVerticalPadding - drawHeight) / 2, sidePanelWidth, drawHeight);
-		RenderSystem.disableBlend();
+		context.drawGuiTexture(RenderPipelines.GUI_TEXTURED, LOCKUP_TEXTURE, 0, (sidePanelVerticalPadding - drawHeight) / 2, sidePanelWidth, drawHeight);
 	}
 
 	@Override
-	public void render(DrawContext context, int mouseX, int mouseY, float delta) {
-		renderBackground(context, mouseX, mouseY, delta);
+	public void render(@NotNull SpruceGuiGraphics graphics, int mouseX, int mouseY, float delta) {
 		if (loaded) {
-			super.render(context, mouseX, mouseY, delta);
-			renderLockup(context);
-			context.drawVerticalLine(sidePanelWidth, 0, height, 0xFFFFFFFF);
+			super.render(graphics, mouseX, mouseY, delta);
+			renderLockup(graphics.vanilla());
+			graphics.vanilla().drawVerticalLine(sidePanelWidth, 0, height, 0xFFFFFFFF);
 		} else {
 			int textWidth = textRenderer.getWidth(LOADING_INDICATOR);
-			context.drawText(textRenderer, LOADING_INDICATOR, width - textWidth - 10, height - 15, 0xFFFFFFFF, true);
+			graphics.drawText(textRenderer, LOADING_INDICATOR, width - textWidth - 10, height - 15, 0xFFFFFFFF, true);
 		}
 	}
 
@@ -198,14 +200,17 @@ public class VotingScreen extends SpruceScreen {
 			setTooltip(url == null ? Text.literal(option.description()).formatted(Formatting.GRAY) : Text.literal(option.description()).formatted(Formatting.GRAY).append(Text.literal("\n")).append(Text.literal("Right-Click").formatted(Formatting.GOLD)).append(Text.literal(" to open the mod page.").formatted(Formatting.WHITE)));
 		}
 
-		@Override
 		public boolean isActive() {
-			return !prohibited && super.isActive();
+			return !prohibited && active;
 		}
 
 		@Override
-		public Optional<Text> getTooltip() {
-			return isActive() ? super.getTooltip() : prohibited ? Optional.of(Text.literal("Prohibited by another category!").formatted(Formatting.GRAY)) : Optional.of(Text.literal("You've reached the category vote limit!").formatted(Formatting.GRAY));
+		public @NotNull TooltipData getTooltip() {
+			return isActive()
+				? super.getTooltip()
+				: prohibited
+				? TooltipData.builder().text(Text.literal("Prohibited by another category!").formatted(Formatting.GRAY)).build()
+				: TooltipData.builder().text(Text.literal("You've reached the category vote limit!").formatted(Formatting.GRAY)).build();
 		}
 
 		@Override
@@ -226,16 +231,16 @@ public class VotingScreen extends SpruceScreen {
 		}
 
 		@Override
-		protected void renderButton(DrawContext context, int mouseX, int mouseY, float delta) {
+		protected void renderButton(SpruceGuiGraphics graphics, int mouseX, int mouseY, float delta) {
 			int textWidth = client.textRenderer.getWidth(getMessage());
 			int left = getX() + 2, right = getX() + getWidth() - 2;
 			int bottom = getY() + getHeight();
 			int textY = (getY() * 2 + getHeight() - 9) / 2 + 1;
 			if (texture != null) {
-				context.drawTexture(texture, left, getY() + 2, 16, 16, 0, 0, 16, 16, 16, 16);
+				graphics.vanilla().drawTexture(RenderPipelines.GUI_TEXTURED, texture, left, getY() + 2, 16, 16, 0, 0, 16, 16, 16, 16);
 			}
 			if (textWidth <= getWidth()) {
-				context.drawCenteredTextWithShadow(client.textRenderer, getMessage(), left + getWidth() / 2, textY, 0xFFFFFFFF);
+				graphics.vanilla().drawCenteredTextWithShadow(client.textRenderer, getMessage(), left + getWidth() / 2, textY, 0xFFFFFFFF);
 				return;
 			}
 			int extraWidth = textWidth - getWidth();
@@ -243,24 +248,24 @@ public class VotingScreen extends SpruceScreen {
 			double clampedWidth = Math.max(extraWidth * 0.5, 3.0);
 			double scroll = Math.sin((Math.PI / 2.0) * Math.cos((Math.PI * 2) * seconds / clampedWidth)) / 2.0 + 0.5;
 			double offset = MathHelper.lerp(scroll, 0.0, extraWidth);
-			context.enableScissor(left, Math.max(getY(), parent.getY()), right, bottom);
-			context.drawTextWithShadow(client.textRenderer, getMessage(), left - (int) offset, textY, 0xFFFFFFFF);
-			context.disableScissor();
+			graphics.enableScissor(left, Math.max(getY(), parent.getY()), right, bottom);
+			graphics.vanilla().drawTextWithShadow(client.textRenderer, getMessage(), left - (int) offset, textY, 0xFFFFFFFF);
+			graphics.disableScissor();
 		}
 
 		@Override
-		protected void renderWidget(DrawContext context, int mouseX, int mouseY, float delta) {
-			super.renderWidget(context, mouseX, mouseY, delta);
+		protected void renderWidget(SpruceGuiGraphics graphics, int mouseX, int mouseY, float delta) {
+			super.renderWidget(graphics, mouseX, mouseY, delta);
 			if (selected) {
-				context.drawTexture(CHECKMARK_TEXTURE, getX() + getWidth() - 11, getY() + getHeight() - 9, 0, 0, 7, 6, 7, 6);
+				graphics.drawTexture(RenderPipelines.GUI_TEXTURED, CHECKMARK_TEXTURE, getX() + getWidth() - 11, getY() + getHeight() - 9, 0, 0, 7, 6, 7, 6);
 			}
 		}
 
 		@Override
-		public void render(DrawContext context, int mouseX, int mouseY, float delta) {
-			context.enableScissor(parent.getX(), parent.getY(), parent.getX() + parent.getWidth(), parent.getY() + parent.getHeight());
-			super.render(context, mouseX, mouseY, delta);
-			context.disableScissor();
+		public void render(@NotNull SpruceGuiGraphics graphics, int mouseX, int mouseY, float delta) {
+			graphics.enableScissor(parent.getX(), parent.getY(), parent.getX() + parent.getWidth(), parent.getY() + parent.getHeight());
+			super.render(graphics, mouseX, mouseY, delta);
+			graphics.disableScissor();
 		}
 	}
 
@@ -319,19 +324,19 @@ public class VotingScreen extends SpruceScreen {
 		public float drawTitleText(DrawContext context) {
 			int titleWidth = client.textRenderer.getWidth(titleText);
 			float titleScale = Math.min((float) (width - 20) / titleWidth, 2.0f);
-			context.getMatrices().push();
-			context.getMatrices().translate(getPosition().getX() + 10, 10, 0);
-			context.getMatrices().scale(titleScale, titleScale, 1.0f);
+			context.getMatrices().pushMatrix();
+			context.getMatrices().translate(getPosition().getX() + 10, 10);
+			context.getMatrices().scale(titleScale, titleScale);
 			context.drawText(client.textRenderer, titleText, 0, 0, 0xFFFFFFFF, true);
-			context.getMatrices().pop();
+			context.getMatrices().popMatrix();
 			return titleScale;
 		}
 
 		@Override
-		protected void renderWidget(DrawContext context, int mouseX, int mouseY, float delta) {
-			float titleScale = drawTitleText(context);
-			context.drawText(client.textRenderer, Text.literal(category.description()), getPosition().getX() + 10, 15 + (int) (9 * titleScale), 0xFFFFFFFF, true);
-			super.renderWidget(context, mouseX, mouseY, delta);
+		protected void renderWidget(SpruceGuiGraphics graphics, int mouseX, int mouseY, float delta) {
+			float titleScale = drawTitleText(graphics.vanilla());
+			graphics.drawText(client.textRenderer, Text.literal(category.description()), getPosition().getX() + 10, 15 + (int) (9 * titleScale), 0xFFFFFFFF, true);
+			super.renderWidget(graphics, mouseX, mouseY, delta);
 		}
 	}
 }

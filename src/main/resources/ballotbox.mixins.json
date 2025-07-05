@@ -15,5 +15,5 @@
   },
   "mixins": [
     "client.ElementAccessor"
-    ]
+  ]
 }
