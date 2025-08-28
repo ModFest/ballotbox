@@ -1,24 +1,10 @@
 [
 	{
-		"id": "best_time_themed",
-		"name": "Best Time-Themed",
+		"id": "best_toy_themed",
+		"name": "Best Toy-Themed",
 		"description": "The best of the best!",
 		"type": "theme",
-		"limit": 5
-	},
-	{
-		"id": "best_technology_themed",
-		"name": "Best Technology-Themed",
-		"description": "The best of the best!",
-		"type": "theme",
-		"limit": 5
-	},
-	{
-		"id": "best_throwbacks_themed",
-		"name": "Best Throwbacks-Themed",
-		"description": "The best of the best!",
-		"type": "theme",
-		"limit": 5
+		"limit": 8
 	},
 	{
 		"id": "funniest",

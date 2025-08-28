@@ -187,7 +187,7 @@ public class VotingScreen extends SpruceScreen {
 			selected = selections.containsEntry(category.id(), option.id());
 			this.prohibited = prohibited;
 			if (!modIconCache.containsKey(option.id())) {
-				modIconCache.put(option.id(), Identifier.of(BallotBox.ID, option.id() + "_icon"));
+				modIconCache.put(option.id(), Identifier.of(BallotBox.ID, option.id().replaceAll("[^a-zA-Z0-9_]", "") + "_icon"));
 				Optional<ModContainer> mod = FabricLoader.getInstance().getModContainer(option.mod_id().isPresent() ? option.mod_id().get() : option.id())
 					.or(() -> FabricLoader.getInstance().getModContainer(option.id().replace("_", "-")))
 					.or(() -> FabricLoader.getInstance().getModContainer(option.id().replace("_", "")));
