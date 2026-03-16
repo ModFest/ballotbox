@@ -7,7 +7,9 @@ plugins {
 }
 
 version = "$baseVersion+$branch"
-archivesBaseName = project.slug
+base {
+	archivesName = project.slug
+}
 
 repositories {
 	maven { url "https://maven.terraformersmc.com/releases" }
