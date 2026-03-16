@@ -3,11 +3,10 @@ package net.modfest.ballotbox.util;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
 import net.fabricmc.loader.api.metadata.ModMetadata;
-import net.minecraft.client.texture.NativeImage;
-import net.minecraft.client.texture.NativeImageBackedTexture;
+import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.modfest.ballotbox.BallotBox;
 import org.apache.commons.lang3.Validate;
-
+import com.mojang.blaze3d.platform.NativeImage;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -20,9 +19,9 @@ import java.util.Optional;
  * Liberally stolen from ModMenu. Thanks ModMenu!
  */
 public class ModMetaUtil {
-	private static final Map<Path, NativeImageBackedTexture> modIconCache = new HashMap<>();
+	private static final Map<Path, DynamicTexture> modIconCache = new HashMap<>();
 
-	public static NativeImageBackedTexture createIcon(ModContainer iconSource, String iconPath) {
+	public static DynamicTexture createIcon(ModContainer iconSource, String iconPath) {
 		try {
 			Optional<Path> optionalPath = iconSource.findPath(iconPath);
 
@@ -33,7 +32,7 @@ public class ModMetaUtil {
 
 			Path path = optionalPath.get();
 
-			NativeImageBackedTexture cachedIcon = modIconCache.get(path);
+			DynamicTexture cachedIcon = modIconCache.get(path);
 			if (cachedIcon != null) {
 				return cachedIcon;
 			}
@@ -44,7 +43,7 @@ public class ModMetaUtil {
 			try (InputStream inputStream = Files.newInputStream(path)) {
 				NativeImage image = NativeImage.read(Objects.requireNonNull(inputStream));
 				Validate.validState(image.getHeight() == image.getWidth(), "Must be square icon");
-				NativeImageBackedTexture tex = new NativeImageBackedTexture(() -> iconPath, image);
+				DynamicTexture tex = new DynamicTexture(() -> iconPath, image);
 				modIconCache.put(path, tex);
 				return tex;
 			}
@@ -67,7 +66,7 @@ public class ModMetaUtil {
 		}
 	}
 
-	public static NativeImageBackedTexture getMissingIcon() {
+	public static DynamicTexture getMissingIcon() {
 		return createIcon(
 			FabricLoader.getInstance()
 				.getModContainer(BallotBox.ID)
@@ -76,7 +75,7 @@ public class ModMetaUtil {
 		);
 	}
 
-	public static NativeImageBackedTexture getIcon(ModContainer mod, int preferredSize) {
+	public static DynamicTexture getIcon(ModContainer mod, int preferredSize) {
 		ModMetadata meta = mod.getMetadata();
 		String modId = meta.getId();
 		String iconPath = meta.getIconPath(preferredSize).orElse("assets/" + modId + "/icon.png");
@@ -84,7 +83,7 @@ public class ModMetaUtil {
 		ModContainer iconSource = FabricLoader.getInstance()
 			.getModContainer(modId)
 			.orElseThrow(() -> new RuntimeException("Cannot get ModContainer for Fabric mod with id " + finalIconSourceId));
-		NativeImageBackedTexture icon = createIcon(iconSource, iconPath);
+		DynamicTexture icon = createIcon(iconSource, iconPath);
 		if (icon == null) return getMissingIcon();
 		return icon;
 	}

@@ -1,21 +1,21 @@
 package net.modfest.ballotbox.packet;
 
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.codec.PacketCodecs;
-import net.minecraft.network.packet.CustomPayload;
-import net.minecraft.util.Identifier;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
 import net.modfest.ballotbox.BallotBox;
 import net.modfest.ballotbox.data.VotingSelections;
 
-public record C2SUpdateVote(VotingSelections selections) implements CustomPayload {
-	public static final CustomPayload.Id<C2SUpdateVote> ID = new CustomPayload.Id<>(Identifier.of(BallotBox.ID, "update_vote"));
-	public static final PacketCodec<RegistryByteBuf, C2SUpdateVote> CODEC = PacketCodec.tuple(
-		PacketCodecs.codec(VotingSelections.CODEC), C2SUpdateVote::selections, C2SUpdateVote::new
+public record C2SUpdateVote(VotingSelections selections) implements CustomPacketPayload {
+	public static final CustomPacketPayload.Type<C2SUpdateVote> ID = new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(BallotBox.ID, "update_vote"));
+	public static final StreamCodec<RegistryFriendlyByteBuf, C2SUpdateVote> CODEC = StreamCodec.composite(
+		ByteBufCodecs.fromCodec(VotingSelections.CODEC), C2SUpdateVote::selections, C2SUpdateVote::new
 	);
 
 	@Override
-	public CustomPayload.Id<? extends CustomPayload> getId() {
+	public CustomPacketPayload.Type<? extends CustomPacketPayload> type() {
 		return ID;
 	}
 }

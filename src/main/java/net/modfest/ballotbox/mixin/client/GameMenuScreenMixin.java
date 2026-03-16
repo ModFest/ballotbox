@@ -2,16 +2,16 @@ package net.modfest.ballotbox.mixin.client;
 
 import com.llamalad7.mixinextras.injector.ModifyReceiver;
 import com.llamalad7.mixinextras.sugar.Local;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.GameMenuScreen;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.gui.widget.GridWidget;
-import net.minecraft.client.gui.widget.SimplePositioningWidget;
-import net.minecraft.client.gui.widget.TexturedButtonWidget;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.ImageButton;
+import net.minecraft.client.gui.layouts.FrameLayout;
+import net.minecraft.client.gui.layouts.GridLayout;
+import net.minecraft.client.gui.screens.PauseScreen;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.Component;
 import net.modfest.ballotbox.BallotBox;
 import net.modfest.ballotbox.ButtonActionType;
 import net.modfest.ballotbox.client.BallotBoxButtons;
@@ -23,21 +23,21 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.function.Consumer;
 
-@Mixin(value = GameMenuScreen.class, priority = 1200)
+@Mixin(value = PauseScreen.class, priority = 1200)
 public abstract class GameMenuScreenMixin extends Screen {
-	private static ButtonWidget ballotbox$voteButton = null;
+	private static Button ballotbox$voteButton = null;
 
-	protected GameMenuScreenMixin(Text title) {
+	protected GameMenuScreenMixin(Component title) {
 		super(title);
 	}
 
-	@Inject(method = "initWidgets", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/widget/GridWidget;forEachChild(Ljava/util/function/Consumer;)V"))
-	private void onInitWidgets(CallbackInfo ci, @Local GridWidget instance) {
+	@Inject(method = "createPauseMenu", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/layouts/GridLayout;visitWidgets(Ljava/util/function/Consumer;)V"))
+	private void onInitWidgets(CallbackInfo ci, @Local GridLayout instance) {
 		var reorganize = false;
 		var children = ((GridWidgetAccessor) instance).getChildren();
-		var grids = ((GridWidgetAccessor) instance).getGrids();
+		var grids = ((GridWidgetAccessor) instance).getCellInhabitants();
 		for (var pair : BallotBoxButtons.createButtons()) {
-			var settings = pair.getLeft();
+			var settings = pair.getA();
 			if (!settings.apply_in_pause_screen.value()) {
 				continue;
 			}
@@ -46,7 +46,7 @@ public abstract class GameMenuScreenMixin extends Screen {
 				for (int i = 0; i < children.size(); i++) {
 					var child = children.get(i);
 					if (BallotBoxButtons.match(child, settings)) {
-						var button = pair.getRight().apply(this).width(child.getWidth()).position(child.getX(), child.getY()).build();
+						var button = pair.getB().apply(this).width(child.getWidth()).pos(child.getX(), child.getY()).build();
 						if (settings == BallotBox.CONFIG.voting_button) {
 							ballotbox$voteButton = button;
 						}
@@ -62,7 +62,7 @@ public abstract class GameMenuScreenMixin extends Screen {
 						var child = children.get(i);
 						if (child.getClass().getName().equals("com.terraformersmc.modmenu.gui.widget.ModMenuButtonWidget")) {
 							children.remove(i);
-							instance.add(child, ((ElementAccessor) grids.get(i - 1)).getRow() + 1, 0, 1, 2);
+							instance.addChild(child, ((ElementAccessor) grids.get(i - 1)).getRow() + 1, 0, 1, 2);
 							i++;
 							var newChild = children.removeLast();
 							var grid = grids.removeLast();
@@ -77,7 +77,7 @@ public abstract class GameMenuScreenMixin extends Screen {
 							break;
 						} else if (child.getClass().getName().equals("com.terraformersmc.modmenu.gui.widget.UpdateCheckerTexturedButtonWidget")) {
 							children.remove(i);
-							this.addDrawableChild((TexturedButtonWidget) child);
+							this.addRenderableWidget((ImageButton) child);
 							break;
 						}
 					}
@@ -95,12 +95,12 @@ public abstract class GameMenuScreenMixin extends Screen {
 							--i;
 						}
 
-						var button = pair.getRight().apply(this).width(204).build();
+						var button = pair.getB().apply(this).width(204).build();
 						if (settings == BallotBox.CONFIG.voting_button) {
 							ballotbox$voteButton = button;
 						}
 						var isLast = i == children.size() - 1;
-						instance.add(button, ((ElementAccessor) grids.get(i)).getRow() + (after ? 1 : 0),  0, 1, 2);
+						instance.addChild(button, ((ElementAccessor) grids.get(i)).getRow() + (after ? 1 : 0),  0, 1, 2);
 						if (isLast) {
 							break;
 						}
@@ -119,23 +119,23 @@ public abstract class GameMenuScreenMixin extends Screen {
 			}
 		}
 		if (reorganize) {
-			instance.refreshPositions();
-			SimplePositioningWidget.setPos(instance, 0, 0, this.width, this.height, 0.5F, 0.25F);
+			instance.arrangeElements();
+			FrameLayout.alignInRectangle(instance, 0, 0, this.width, this.height, 0.5F, 0.25F);
 		}
 	}
 
 	@Inject(method = "render", at = @At("TAIL"))
-	private void addReminder(DrawContext context, int mouseX, int mouseY, float delta, CallbackInfo ci) {
+	private void addReminder(GuiGraphics context, int mouseX, int mouseY, float delta, CallbackInfo ci) {
 		if (ballotbox$voteButton == null) return;
 		ballotbox$voteButton.active = BallotBoxClient.isOpen();
 		if (BallotBoxClient.isOpen() && BallotBoxClient.remainingVotes > 0) {
 			int xOffset = BallotBox.CONFIG.reminder_settings.reminder_x_offset.value();
 			int yOffset = BallotBox.CONFIG.reminder_settings.reminder_y_offset.value();
-			Text remainingText = Text.literal("%s vote%s available!".formatted(BallotBoxClient.remainingVotes, BallotBoxClient.remainingVotes > 1 ? "s" : "")).formatted(Formatting.GREEN);
-			context.drawText(MinecraftClient.getInstance().textRenderer, remainingText, ballotbox$voteButton.getX() - MinecraftClient.getInstance().textRenderer.getWidth(remainingText) - 2 + xOffset, ballotbox$voteButton.getY() + 2 + yOffset, 0xFFFFFFFF, true);
+			Component remainingText = Component.literal("%s vote%s available!".formatted(BallotBoxClient.remainingVotes, BallotBoxClient.remainingVotes > 1 ? "s" : "")).withStyle(ChatFormatting.GREEN);
+			context.drawString(Minecraft.getInstance().font, remainingText, ballotbox$voteButton.getX() - Minecraft.getInstance().font.width(remainingText) - 2 + xOffset, ballotbox$voteButton.getY() + 2 + yOffset, 0xFFFFFFFF, true);
 			if (BallotBoxClient.closingTime != null) {
-				Text timeText = Text.literal("Closes %s.".formatted(BallotBox.relativeTime(BallotBoxClient.closingTime))).formatted(Formatting.YELLOW);
-				context.drawText(MinecraftClient.getInstance().textRenderer, timeText, ballotbox$voteButton.getX() - MinecraftClient.getInstance().textRenderer.getWidth(timeText) - 2 + xOffset, ballotbox$voteButton.getY() + 10 + yOffset, 0xFFFFFFFF, true);
+				Component timeText = Component.literal("Closes %s.".formatted(BallotBox.relativeTime(BallotBoxClient.closingTime))).withStyle(ChatFormatting.YELLOW);
+				context.drawString(Minecraft.getInstance().font, timeText, ballotbox$voteButton.getX() - Minecraft.getInstance().font.width(timeText) - 2 + xOffset, ballotbox$voteButton.getY() + 10 + yOffset, 0xFFFFFFFF, true);
 			}
 		}
 	}

@@ -4,7 +4,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(targets = "net.minecraft.client.gui.widget.GridWidget$Element")
+@Mixin(targets = "net.minecraft.client.gui.layouts.GridLayout$CellInhabitant")
 public interface ElementAccessor {
 	@Accessor
 	int getRow();

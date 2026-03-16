@@ -28,7 +28,7 @@ public class BallotBoxConfig extends ReflectiveConfig {
 	public final ReminderSettings reminder_settings = new ReminderSettings();
 
 
-	public static class ButtonSettings extends Section {
+	public static class ButtonSettings extends folk.sisby.kaleido.lib.quiltconfig.api.ReflectiveConfig.Section {
 
 		public final TrackedValue<ButtonActionType> action_type = value(ButtonActionType.REPLACE);
 		public final TrackedValue<ValueList<String>> target_button;
@@ -48,7 +48,7 @@ public class BallotBoxConfig extends ReflectiveConfig {
 		}
 	}
 
-	public static class ReminderSettings extends Section {
+	public static class ReminderSettings extends folk.sisby.kaleido.lib.quiltconfig.api.ReflectiveConfig.Section {
 		public final TrackedValue<Integer> reminder_x_offset;
 		public final TrackedValue<Integer> reminder_y_offset;
 		public ReminderSettings() {

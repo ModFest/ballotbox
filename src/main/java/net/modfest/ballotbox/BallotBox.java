@@ -8,7 +8,7 @@ import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.world.World;
+import net.minecraft.world.level.Level;
 import net.modfest.ballotbox.data.VotingCategory;
 import net.modfest.ballotbox.data.VotingSelections;
 import net.modfest.ballotbox.packet.S2CGameJoin;
@@ -64,8 +64,8 @@ public class BallotBox implements ModInitializer {
 		BallotBoxNetworking.init();
 		CommandRegistrationCallback.EVENT.register(BallotBoxCommands::register);
 		ServerWorldEvents.LOAD.register(((server, world) -> {
-			if (world.getRegistryKey() == World.OVERWORLD) {
-				STATE = world.getPersistentStateManager().getOrCreate(BallotState.TYPE);
+			if (world.dimension() == Level.OVERWORLD) {
+				STATE = world.getDataStorage().computeIfAbsent(BallotState.TYPE);
 			}
 		}));
 		ServerLifecycleEvents.SERVER_STARTED.register((server -> {
@@ -78,7 +78,7 @@ public class BallotBox implements ModInitializer {
 		}));
 		ServerPlayConnectionEvents.JOIN.register(((handler, sender, server) -> {
 			if (!ServerPlayNetworking.canSend(handler.getPlayer(), S2CGameJoin.ID)) return;
-			VotingSelections selections = STATE.selections().get(handler.getPlayer().getUuid());
+			VotingSelections selections = STATE.selections().get(handler.getPlayer().getUUID());
 			int totalVotes = BallotBoxPlatformClient.categories.values().stream().mapToInt(VotingCategory::limit).sum();
 			int remainingVotes = totalVotes - (selections == null ? 0 : selections.votes().size());
 			sender.sendPacket(new S2CGameJoin(CONFIG.closingTime.value(), remainingVotes));
