@@ -29,7 +29,11 @@ public class BallotBoxButtons {
 		list.add(new Tuple<>(BallotBox.CONFIG.voting_button, (screen) -> Button.builder(Component.nullToEmpty("Submission Voting"), b -> {
 			Minecraft.getInstance().setScreen(new VotingScreen());
 			ClientPlayNetworking.send(new OpenVoteScreen());
-		}).tooltip(BallotBoxClient.isOpen() ? null : Tooltip.create(Component.literal("Closed %s.".formatted(BallotBox.relativeTime(BallotBoxClient.closingTime))).withStyle(ChatFormatting.GRAY)))));
+		}).tooltip(
+			!BallotBoxClient.isOpen() ? Tooltip.create(Component.literal("Closed %s.".formatted(BallotBox.relativeTime(BallotBoxClient.closingTime))).withStyle(ChatFormatting.GRAY))
+				: !BallotBoxClient.isEnabled(Minecraft.getInstance()) ? Tooltip.create(Component.literal("Voting isn't available in singleplayer!").withStyle(ChatFormatting.GRAY))
+				: null
+		)));
 
 		list.add(new Tuple<>(BallotBox.CONFIG.custom_link_button,
 			(screen) -> Button.builder(Component.nullToEmpty(BallotBox.CONFIG.custom_link_text.value()), ConfirmLinkScreen.confirmLink(screen, BallotBox.CONFIG.custom_link_url.value()))));

@@ -102,7 +102,7 @@ public abstract class GameMenuScreenMixin extends Screen {
 	@Inject(method = "extractRenderState", at = @At("TAIL"))
 	private void addReminder(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta, CallbackInfo ci) {
 		if (ballotbox$voteButton == null) return;
-		ballotbox$voteButton.active = BallotBoxClient.isOpen();
+		ballotbox$voteButton.active = BallotBoxClient.isOpen() && BallotBoxClient.isEnabled(Minecraft.getInstance());
 		if (BallotBoxClient.isOpen() && BallotBoxClient.remainingVotes > 0) {
 			int xOffset = BallotBox.CONFIG.reminder_settings.reminder_x_offset.value();
 			int yOffset = BallotBox.CONFIG.reminder_settings.reminder_y_offset.value();
