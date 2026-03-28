@@ -5,7 +5,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.JsonOps;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.modfest.ballotbox.data.VotingCategory;
 import net.modfest.ballotbox.data.VotingOption;
@@ -20,8 +20,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class BallotBoxPlatformClient {
-	public static final ResourceLocation CATEGORIES_DATA = ResourceLocation.fromNamespaceAndPath(BallotBox.ID, "ballot/categories.json");
-	public static final ResourceLocation OPTIONS_DATA = ResourceLocation.fromNamespaceAndPath(BallotBox.ID, "ballot/options.json");
+	public static final Identifier CATEGORIES_DATA = Identifier.fromNamespaceAndPath(BallotBox.ID, "ballot/categories.json");
+	public static final Identifier OPTIONS_DATA = Identifier.fromNamespaceAndPath(BallotBox.ID, "ballot/options.json");
 	public final static Gson GSON = new Gson();
 	public static Map<String, VotingOption> options = new ConcurrentHashMap<>();
 	public static Map<String, VotingCategory> categories = new ConcurrentHashMap<>();

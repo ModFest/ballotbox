@@ -1,0 +1,4 @@
+accessWidener v2 official
+
+accessible class net/minecraft/client/gui/layouts/GridLayout$ChildContainer
+accessible method net/minecraft/client/gui/layouts/GridLayout$ChildContainer <init> (Lnet/minecraft/client/gui/layouts/LayoutElement;IIIILnet/minecraft/client/gui/layouts/LayoutSettings;)V

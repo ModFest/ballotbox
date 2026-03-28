@@ -2,20 +2,22 @@ package net.modfest.ballotbox.client;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
+import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
 import net.modfest.ballotbox.BallotBox;
 import net.modfest.ballotbox.packet.OpenVoteScreen;
 
 public class BallotBoxKeybinds {
-	public static final KeyMapping OPEN_VOTING_SCREEN = new KeyMapping("key.ballotbox.open", InputConstants.Type.KEYSYM, InputConstants.KEY_APOSTROPHE, "key.ballotbox.category");
+	public static final KeyMapping.Category BALLOTBOX_CATEGORY = KeyMapping.Category.register(Identifier.fromNamespaceAndPath(BallotBox.ID, "ballotbox"));
+	public static final KeyMapping OPEN_VOTING_SCREEN = new KeyMapping("key.ballotbox.open", InputConstants.Type.KEYSYM, InputConstants.KEY_APOSTROPHE, BALLOTBOX_CATEGORY);
 
 	public static void init() {
-		KeyBindingHelper.registerKeyBinding(OPEN_VOTING_SCREEN);
+		KeyMappingHelper.registerKeyMapping(OPEN_VOTING_SCREEN);
 		ClientTickEvents.END_CLIENT_TICK.register(BallotBoxKeybinds::tick);
 	}
 

@@ -12,15 +12,14 @@ import net.modfest.ballotbox.packet.S2CGameJoin;
 import net.modfest.ballotbox.packet.S2CVoteScreenData;
 
 import java.util.ArrayList;
-import java.util.Map;
 
 public class BallotBoxNetworking {
 	public static void init() {
-		PayloadTypeRegistry.playC2S().register(C2SUpdateVote.ID, C2SUpdateVote.CODEC);
-		PayloadTypeRegistry.playC2S().register(OpenVoteScreen.ID, OpenVoteScreen.CODEC);
-		PayloadTypeRegistry.playS2C().register(S2CGameJoin.ID, S2CGameJoin.CODEC);
-		PayloadTypeRegistry.playS2C().register(OpenVoteScreen.ID, OpenVoteScreen.CODEC);
-		PayloadTypeRegistry.playS2C().register(S2CVoteScreenData.ID, S2CVoteScreenData.CODEC);
+		PayloadTypeRegistry.serverboundPlay().register(C2SUpdateVote.ID, C2SUpdateVote.CODEC);
+		PayloadTypeRegistry.serverboundPlay().register(OpenVoteScreen.ID, OpenVoteScreen.CODEC);
+		PayloadTypeRegistry.clientboundPlay().register(S2CGameJoin.ID, S2CGameJoin.CODEC);
+		PayloadTypeRegistry.clientboundPlay().register(OpenVoteScreen.ID, OpenVoteScreen.CODEC);
+		PayloadTypeRegistry.clientboundPlay().register(S2CVoteScreenData.ID, S2CVoteScreenData.CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(C2SUpdateVote.ID, BallotBoxNetworking::handleUpdateVote);
 		ServerPlayNetworking.registerGlobalReceiver(OpenVoteScreen.ID, BallotBoxNetworking::handleOpenVoteScreen);
 	}
@@ -38,7 +37,7 @@ public class BallotBoxNetworking {
 		if (!BallotBox.isOpen()) return;
 		BallotBoxPlatformClient.putSelections(context.player().getUUID(), packet.selections()).thenAccept(success -> {
 			if (success) {
-				context.player().displayClientMessage(Component.literal("[BallotBox] ").withStyle(ChatFormatting.AQUA).append(Component.literal("Votes Saved! You assigned %s/%s votes over %s/%s categories.".formatted(packet.selections().votes().size(), BallotBoxPlatformClient.categories.values().stream().mapToInt(VotingCategory::limit).sum(), packet.selections().votes().keySet().size(), BallotBoxPlatformClient.categories.size())).withStyle(ChatFormatting.GREEN)), true);
+				context.player().sendOverlayMessage(Component.literal("[BallotBox] ").withStyle(ChatFormatting.AQUA).append(Component.literal("Votes Saved! You assigned %s/%s votes over %s/%s categories.".formatted(packet.selections().votes().size(), BallotBoxPlatformClient.categories.values().stream().mapToInt(VotingCategory::limit).sum(), packet.selections().votes().keySet().size(), BallotBoxPlatformClient.categories.size())).withStyle(ChatFormatting.GREEN)));
 			} else {
 				BallotBox.LOGGER.info("[BallotBox] Failed to save selections from player {}!", context.player().getName());
 			}

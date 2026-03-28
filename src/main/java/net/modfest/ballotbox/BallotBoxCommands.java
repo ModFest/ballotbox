@@ -11,6 +11,7 @@ import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.modfest.ballotbox.data.VotingCategory;
 import net.modfest.ballotbox.data.VotingOption;
@@ -22,13 +23,14 @@ import java.util.function.Consumer;
 
 public class BallotBoxCommands {
 	public interface BallotBoxCommandExecutor {
-		int execute(ServerPlayer player, String arg, Consumer<Component> feedback);
+		int execute(ServerPlayer player, MinecraftServer server, String arg, Consumer<Component> feedback);
 	}
 
 	public static int execute(CommandContext<CommandSourceStack> context, String arg, BallotBoxCommandExecutor executor) {
 		ServerPlayer player = context.getSource().getPlayer();
+		MinecraftServer server = context.getSource().getServer();
 		try {
-			return executor.execute(player, arg != null ? context.getArgument(arg, String.class) : null, t -> context.getSource().sendSuccess(() -> t, false));
+			return executor.execute(player, server, arg != null ? context.getArgument(arg, String.class) : null, t -> context.getSource().sendSuccess(() -> t, false));
 		} catch (Exception e) {
 			context.getSource().sendSuccess(() -> Component.literal("Command failed! Check log for details.").withStyle(ChatFormatting.RED), false);
 			BallotBox.LOGGER.error("[BallotBox] Error while executing command: {}", context.getInput(), e);
@@ -39,12 +41,12 @@ public class BallotBoxCommands {
 	public static void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext context, Commands.CommandSelection environment) {
 		dispatcher.register(
 			Commands.literal("vote")
-				.executes(c -> execute(c, null, (p, a1, f) -> BallotBoxCommands.vote(p, f)))
+				.executes(c -> execute(c, null, (p, s, a1, f) -> BallotBoxCommands.vote(p, s, f)))
 		);
 		dispatcher.register(
 			Commands.literal("votes")
-				.requires(s -> s.hasPermission(4))
-				.executes(c -> execute(c, null, (p, a1, f) -> BallotBoxCommands.votes(f)))
+				.requires(Commands.hasPermission(Commands.LEVEL_OWNERS))
+				.executes(c -> execute(c, null, (p, s, a1, f) -> BallotBoxCommands.votes(f)))
 		);
 	}
 
@@ -70,12 +72,12 @@ public class BallotBoxCommands {
 		return 0;
 	}
 
-	private static int vote(ServerPlayer player, Consumer<Component> feedback) {
+	private static int vote(ServerPlayer player, MinecraftServer server, Consumer<Component> feedback) {
 		if (player == null) {
 			feedback.accept(Component.literal("[BallotBox] ").withStyle(ChatFormatting.GREEN).append(Component.literal("Vote cannot be invoked by a non-player").withStyle(ChatFormatting.RED)));
 			return 0;
 		}
-		if (player.getServer().isSingleplayer()) {
+		if (server.isSingleplayer()) {
 			feedback.accept(Component.literal("[BallotBox] ").withStyle(ChatFormatting.GREEN).append(Component.literal("Voting isn't available in singleplayer!").withStyle(ChatFormatting.RED)));
 			return 0;
 		}

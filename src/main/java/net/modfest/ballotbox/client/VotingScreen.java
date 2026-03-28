@@ -16,14 +16,17 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
 import net.minecraft.ChatFormatting;
-import net.minecraft.Util;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.renderer.Sheets;
+import net.minecraft.client.resources.model.sprite.SpriteId;
+import net.minecraft.util.Util;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.modfest.ballotbox.BallotBox;
 import net.modfest.ballotbox.data.VotingCategory;
@@ -52,7 +55,7 @@ public class VotingScreen extends SpruceScreen {
 		"community"
 	);
 
-	public static final ResourceLocation LOCKUP_TEXTURE = ResourceLocation.fromNamespaceAndPath(BallotBox.ID, "emblem");
+	public static final Identifier LOCKUP_TEXTURE = Identifier.fromNamespaceAndPath(BallotBox.ID, "emblem");
 
 	protected final Multimap<String, String> previousSelections = HashMultimap.create();
 	protected final Multimap<String, String> selections = HashMultimap.create();
@@ -65,7 +68,7 @@ public class VotingScreen extends SpruceScreen {
 	protected int sidePanelVerticalPadding;
 	protected Map<String, CategoryContainerWidget> categoryWidgets = new ConcurrentHashMap<>();
 
-	private final Map<String, ResourceLocation> modIconCache = new ConcurrentHashMap<>();
+	private final Map<String, Identifier> modIconCache = new ConcurrentHashMap<>();
 
 	public VotingScreen() {
 		super(TITLE);
@@ -74,7 +77,7 @@ public class VotingScreen extends SpruceScreen {
 	@Override
 	protected void init() {
 		super.init();
-		this.lockupSprite = Minecraft.getInstance().getGuiSprites().getSprite(LOCKUP_TEXTURE);
+		this.lockupSprite = Minecraft.getInstance().getAtlasManager().get(new SpriteId(Sheets.GUI_SHEET, LOCKUP_TEXTURE));
 		if (loaded) {
 			initLoaded();
 		}
@@ -108,14 +111,14 @@ public class VotingScreen extends SpruceScreen {
 	}
 
 	@Override
-	public void renderBackground(GuiGraphics context, int mouseX, int mouseY, float delta) {
-		super.renderBackground(context, mouseX, mouseY, delta);
+	public void extractBackground(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
+		super.extractBackground(context, mouseX, mouseY, delta);
 		if (loaded) {
 			context.fill(0, 0, sidePanelWidth, height, 0x30000000);
 		}
 	}
 
-	public void renderLockup(GuiGraphics context) {
+	public void renderLockup(GuiGraphicsExtractor context) {
 		if (lockupSprite == null) return;
 		int texHeight = lockupSprite.contents().height();
 		int texWidth = lockupSprite.contents().width();
@@ -124,14 +127,14 @@ public class VotingScreen extends SpruceScreen {
 	}
 
 	@Override
-	public void render(@NotNull SpruceGuiGraphics graphics, int mouseX, int mouseY, float delta) {
+	public void extractRenderState(@NotNull SpruceGuiGraphics graphics, int mouseX, int mouseY, float delta) {
 		if (loaded) {
-			super.render(graphics, mouseX, mouseY, delta);
+			super.extractRenderState(graphics, mouseX, mouseY, delta);
 			renderLockup(graphics.vanilla());
-			graphics.vanilla().vLine(sidePanelWidth, 0, height, 0xFFFFFFFF);
+			graphics.vanilla().verticalLine(sidePanelWidth, 0, height, 0xFFFFFFFF);
 		} else {
 			int textWidth = font.width(LOADING_INDICATOR);
-			graphics.drawText(font, LOADING_INDICATOR, width - textWidth - 10, height - 15, 0xFFFFFFFF, true);
+			graphics.text(font, LOADING_INDICATOR, width - textWidth - 10, height - 15, 0xFFFFFFFF, true);
 		}
 	}
 
@@ -160,14 +163,14 @@ public class VotingScreen extends SpruceScreen {
 	}
 
 	public class VotingOptionButtonWidget extends SpruceButtonWidget {
-		public static final ResourceLocation VOTED_TEXTURE = ResourceLocation.fromNamespaceAndPath(BallotBox.ID, "button_voted");
-		public static final ResourceLocation CHECKMARK_TEXTURE = ResourceLocation.fromNamespaceAndPath(BallotBox.ID, "textures/gui/button_checkmark.png");
+		public static final Identifier VOTED_TEXTURE = Identifier.fromNamespaceAndPath(BallotBox.ID, "button_voted");
+		public static final Identifier CHECKMARK_TEXTURE = Identifier.fromNamespaceAndPath(BallotBox.ID, "textures/gui/button_checkmark.png");
 
 		public final CategoryContainerWidget parent;
 		public boolean selected;
 		public boolean prohibited;
 		public String url;
-		public ResourceLocation texture;
+		public Identifier texture;
 
 		public VotingOptionButtonWidget(Position position, int width, int height, VotingCategory category, VotingOption option, CategoryContainerWidget parent, boolean prohibited) {
 			super(position, width, height, Component.literal(option.name()), button -> {
@@ -187,7 +190,7 @@ public class VotingScreen extends SpruceScreen {
 			selected = selections.containsEntry(category.id(), option.id());
 			this.prohibited = prohibited;
 			if (!modIconCache.containsKey(option.id())) {
-				modIconCache.put(option.id(), ResourceLocation.fromNamespaceAndPath(BallotBox.ID, option.id().replaceAll("[^a-zA-Z0-9_]", "") + "_icon"));
+				modIconCache.put(option.id(), Identifier.fromNamespaceAndPath(BallotBox.ID, option.id().replaceAll("[^a-zA-Z0-9_]", "") + "_icon"));
 				Optional<ModContainer> mod = FabricLoader.getInstance().getModContainer(option.mod_id().isPresent() ? option.mod_id().get() : option.id())
 					.or(() -> FabricLoader.getInstance().getModContainer(option.id().replace("_", "-")))
 					.or(() -> FabricLoader.getInstance().getModContainer(option.id().replace("_", "")));
@@ -214,16 +217,16 @@ public class VotingScreen extends SpruceScreen {
 		}
 
 		@Override
-		protected boolean onMouseClick(double mouseX, double mouseY, int button) {
-			if (button == GLFW.GLFW_MOUSE_BUTTON_2 && url != null) {
+		protected boolean onMouseClick(MouseButtonEvent event, boolean doubleClick) {
+			if (event.button() == GLFW.GLFW_MOUSE_BUTTON_2 && url != null) {
 				Util.getPlatform().openUri(url); // confirmation screen causes save
 				return true;
 			}
-			return super.onMouseClick(mouseX, mouseY, button);
+			return super.onMouseClick(event, doubleClick);
 		}
 
 		@Override
-		protected ResourceLocation getTexture() {
+		protected Identifier getTexture() {
 			if (selected) {
 				return VOTED_TEXTURE;
 			}
@@ -231,7 +234,7 @@ public class VotingScreen extends SpruceScreen {
 		}
 
 		@Override
-		protected void renderButton(SpruceGuiGraphics graphics, int mouseX, int mouseY, float delta) {
+		protected void extractButton(SpruceGuiGraphics graphics, int mouseX, int mouseY, float delta) {
 			int textWidth = client.font.width(getMessage());
 			int left = getX() + 2, right = getX() + getWidth() - 2;
 			int bottom = getY() + getHeight();
@@ -240,7 +243,7 @@ public class VotingScreen extends SpruceScreen {
 				graphics.vanilla().blit(RenderPipelines.GUI_TEXTURED, texture, left, getY() + 2, 0, 0, 16, 16, 16, 16, 16, 16);
 			}
 			if (textWidth <= getWidth()) {
-				graphics.vanilla().drawCenteredString(client.font, getMessage(), left + getWidth() / 2, textY, 0xFFFFFFFF);
+				graphics.vanilla().centeredText(client.font, getMessage(), left + getWidth() / 2, textY, 0xFFFFFFFF);
 				return;
 			}
 			int extraWidth = textWidth - getWidth();
@@ -249,22 +252,22 @@ public class VotingScreen extends SpruceScreen {
 			double scroll = Math.sin((Math.PI / 2.0) * Math.cos((Math.PI * 2) * seconds / clampedWidth)) / 2.0 + 0.5;
 			double offset = Mth.lerp(scroll, 0.0, extraWidth);
 			graphics.enableScissor(left, Math.max(getY(), parent.getY()), right, bottom);
-			graphics.vanilla().drawString(client.font, getMessage(), left - (int) offset, textY, 0xFFFFFFFF);
+			graphics.vanilla().text(client.font, getMessage(), left - (int) offset, textY, 0xFFFFFFFF);
 			graphics.disableScissor();
 		}
 
 		@Override
-		protected void renderWidget(SpruceGuiGraphics graphics, int mouseX, int mouseY, float delta) {
-			super.renderWidget(graphics, mouseX, mouseY, delta);
+		protected void extractWidgetRenderState(SpruceGuiGraphics graphics, int mouseX, int mouseY, float delta) {
+			super.extractWidgetRenderState(graphics, mouseX, mouseY, delta);
 			if (selected) {
-				graphics.drawTexture(RenderPipelines.GUI_TEXTURED, CHECKMARK_TEXTURE, getX() + getWidth() - 11, getY() + getHeight() - 9, 0, 0, 7, 6, 7, 6);
+				graphics.blit(RenderPipelines.GUI_TEXTURED, CHECKMARK_TEXTURE, getX() + getWidth() - 11, getY() + getHeight() - 9, 0, 0, 7, 6, 7, 6);
 			}
 		}
 
 		@Override
-		public void render(@NotNull SpruceGuiGraphics graphics, int mouseX, int mouseY, float delta) {
+		public void extractRenderState(@NotNull SpruceGuiGraphics graphics, int mouseX, int mouseY, float delta) {
 			graphics.enableScissor(parent.getX(), parent.getY(), parent.getX() + parent.getWidth(), parent.getY() + parent.getHeight());
-			super.render(graphics, mouseX, mouseY, delta);
+			super.extractRenderState(graphics, mouseX, mouseY, delta);
 			graphics.disableScissor();
 		}
 	}
@@ -321,22 +324,22 @@ public class VotingScreen extends SpruceScreen {
 			});
 		}
 
-		public float drawTitleText(GuiGraphics context) {
+		public float drawTitleText(GuiGraphicsExtractor context) {
 			int titleWidth = client.font.width(titleText);
 			float titleScale = Math.min((float) (width - 20) / titleWidth, 2.0f);
 			context.pose().pushMatrix();
 			context.pose().translate(getPosition().getX() + 10, 10);
 			context.pose().scale(titleScale, titleScale);
-			context.drawString(client.font, titleText, 0, 0, 0xFFFFFFFF, true);
+			context.text(client.font, titleText, 0, 0, 0xFFFFFFFF, true);
 			context.pose().popMatrix();
 			return titleScale;
 		}
 
 		@Override
-		protected void renderWidget(SpruceGuiGraphics graphics, int mouseX, int mouseY, float delta) {
+		protected void extractWidgetRenderState(SpruceGuiGraphics graphics, int mouseX, int mouseY, float delta) {
 			float titleScale = drawTitleText(graphics.vanilla());
-			graphics.drawText(client.font, Component.literal(category.description()), getPosition().getX() + 10, 15 + (int) (9 * titleScale), 0xFFFFFFFF, true);
-			super.renderWidget(graphics, mouseX, mouseY, delta);
+			graphics.text(client.font, Component.literal(category.description()), getPosition().getX() + 10, 15 + (int) (9 * titleScale), 0xFFFFFFFF, true);
+			super.extractWidgetRenderState(graphics, mouseX, mouseY, delta);
 		}
 	}
 }

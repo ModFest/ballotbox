@@ -10,7 +10,6 @@ import net.minecraft.client.gui.layouts.LayoutElement;
 import net.minecraft.client.gui.screens.ConfirmLinkScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.WinScreen;
-import net.minecraft.client.sounds.MusicInfo;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.sounds.Musics;
@@ -38,7 +37,7 @@ public class BallotBoxButtons {
 		list.add(new Tuple<>(BallotBox.CONFIG.credits_button, (screen) -> Button.builder(Component.nullToEmpty(BallotBox.CONFIG.credits_text.value()), b -> {
 			Minecraft.getInstance().setScreen(new WinScreen(false, () -> Minecraft.getInstance().setScreen(screen)));
 			Minecraft.getInstance().getMusicManager().stopPlaying();
-			Minecraft.getInstance().getMusicManager().startPlaying(new MusicInfo(Musics.CREDITS));
+			Minecraft.getInstance().getMusicManager().startPlaying(Musics.CREDITS);
 		})));
 
 		return list;

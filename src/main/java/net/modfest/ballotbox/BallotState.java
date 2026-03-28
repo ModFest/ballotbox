@@ -3,6 +3,7 @@ package net.modfest.ballotbox;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.UUIDUtil;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.saveddata.SavedDataType;
 import net.modfest.ballotbox.data.VotingSelections;
@@ -12,13 +13,13 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class BallotState extends SavedData {
-	private static final String STATE_KEY = "ballotbox_ballots";
+	private static final Identifier STATE_KEY = Identifier.fromNamespaceAndPath(BallotBox.ID, "ballots");
 
 	public static final Codec<BallotState> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 		Codec.unboundedMap(UUIDUtil.AUTHLIB_CODEC, VotingSelections.CODEC).xmap(s -> (Map<UUID, VotingSelections>) new ConcurrentHashMap<>(s), ConcurrentHashMap::new).fieldOf("selections").forGetter(BallotState::selections)
 	).apply(instance, BallotState::new));
 
-	public static final SavedDataType<BallotState> TYPE = new SavedDataType<>(STATE_KEY,
+	public static final SavedDataType<BallotState> TYPE = new SavedDataType<BallotState>(STATE_KEY,
 		() -> new BallotState(new ConcurrentHashMap<>()),
 		BallotState.CODEC,
 		null);

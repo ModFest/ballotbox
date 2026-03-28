@@ -3,7 +3,7 @@ package net.modfest.ballotbox;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerWorldEvents;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLevelEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.loader.api.FabricLoader;
@@ -63,7 +63,7 @@ public class BallotBox implements ModInitializer {
 		closingTime = parseClosingTime(CONFIG.closingTime.value());
 		BallotBoxNetworking.init();
 		CommandRegistrationCallback.EVENT.register(BallotBoxCommands::register);
-		ServerWorldEvents.LOAD.register(((server, world) -> {
+		ServerLevelEvents.LOAD.register(((server, world) -> {
 			if (world.dimension() == Level.OVERWORLD) {
 				STATE = world.getDataStorage().computeIfAbsent(BallotState.TYPE);
 			}
