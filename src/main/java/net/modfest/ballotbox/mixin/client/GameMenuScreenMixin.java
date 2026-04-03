@@ -39,6 +39,7 @@ public abstract class GameMenuScreenMixin extends Screen {
 		var reorganize = false;
 		var children = ((GridLayoutAccessor) instance).getChildren();
 		for (var pair : BallotBoxButtons.createButtons()) {
+			boolean found = false;
 			Map<String, ButtonActionType> settings = pair.getA();
 			Set<String> replace = settings.entrySet().stream().filter(e -> e.getValue() == ButtonActionType.REPLACE).map(Map.Entry::getKey).collect(Collectors.toSet());
 			if (!replace.isEmpty()) {
@@ -67,13 +68,14 @@ public abstract class GameMenuScreenMixin extends Screen {
 							containerAccessor.getOccupiedRows(), containerAccessor.getOccupiedColumns(),
 							childContainer.layoutSettings
 						));
+						found = true;
 						break;
 					}
 				}
 			}
 			Set<String> insert = new HashSet<>(settings.keySet());
 			insert.removeAll(replace);
-			if (!insert.isEmpty()) {
+			if (!found && !insert.isEmpty()) {
 				reorganize = true;
 
 				for (int i = 0; i < children.size(); i++) {

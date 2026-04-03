@@ -41,6 +41,7 @@ public abstract class TitleScreenMixin extends Screen implements ApplyModificati
 		findButtons.sort(Comparator.comparing(AbstractWidget::getY));
 
 		for (var pair : BallotBoxButtons.createButtons()) {
+			boolean found = false;
 			var settings = pair.getA();
 
 			Set<String> replace = settings.entrySet().stream().filter(e -> e.getValue() == ButtonActionType.REPLACE).map(Map.Entry::getKey).collect(Collectors.toSet());
@@ -55,13 +56,14 @@ public abstract class TitleScreenMixin extends Screen implements ApplyModificati
 							this.realmsNotificationsScreen = null;
 						}
 						this.addRenderableWidget(button);
+						found = true;
 						break;
 					}
 				}
 			}
 			Set<String> insert = new HashSet<>(settings.keySet());
 			insert.removeAll(replace);
-			if (!insert.isEmpty()) {
+			if (!found && !insert.isEmpty()) {
 				for (int i = 0; i < findButtons.size(); i++) {
 					var child = findButtons.get(i);
 					String firstMatch = BallotBoxButtons.match(child, insert);
