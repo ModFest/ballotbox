@@ -21,6 +21,11 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 @Mixin(value = PauseScreen.class, priority = 1200)
 public abstract class GameMenuScreenMixin extends Screen {
 	private static Button ballotbox$voteButton = null;
@@ -34,18 +39,15 @@ public abstract class GameMenuScreenMixin extends Screen {
 		var reorganize = false;
 		var children = ((GridLayoutAccessor) instance).getChildren();
 		for (var pair : BallotBoxButtons.createButtons()) {
-			var settings = pair.getA();
-			if (!settings.apply_in_pause_screen.value()) {
-				continue;
-			}
-
-			if (settings.action_type.value() == ButtonActionType.REPLACE) {
+			Map<String, ButtonActionType> settings = pair.getA();
+			Set<String> replace = settings.entrySet().stream().filter(e -> e.getValue() == ButtonActionType.REPLACE).map(Map.Entry::getKey).collect(Collectors.toSet());
+			if (!replace.isEmpty()) {
 				for (int i = 0; i < children.size(); i++) {
 					var childContainer = children.get(i);
 					var child = childContainer.child;
 					var containerAccessor = (ChildContainerAccessor) childContainer;
 
-					if (BallotBoxButtons.match(child, settings)) {
+					if (BallotBoxButtons.match(child, replace) != null) {
 						var button = pair.getB().apply(this).width(child.getWidth()).pos(child.getX(), child.getY()).build();
 						if (settings == BallotBox.CONFIG.voting_button) {
 							ballotbox$voteButton = button;
@@ -68,21 +70,25 @@ public abstract class GameMenuScreenMixin extends Screen {
 						break;
 					}
 				}
-			} else {
+			}
+			Set<String> insert = new HashSet<>(settings.keySet());
+			insert.removeAll(replace);
+			if (!insert.isEmpty()) {
 				reorganize = true;
 
 				for (int i = 0; i < children.size(); i++) {
 					var child = children.get(i).child;
-					if (BallotBoxButtons.match(child, settings)) {
-						var after = settings.action_type.value() == ButtonActionType.INSERT_AFTER;
+					String firstMatch = BallotBoxButtons.match(child, insert);
+					if (firstMatch != null) {
+						var after = settings.get(firstMatch) == ButtonActionType.INSERT_AFTER;
 
 						var button = pair.getB().apply(this).width(204).build();
 						if (settings == BallotBox.CONFIG.voting_button) {
 							ballotbox$voteButton = button;
 						}
 						var insertRow = ((ChildContainerAccessor) children.get(i)).getRow() + (after ? 1 : 0);
-						for (int j = 0; j < children.size(); j++) {
-							var chjld = (ChildContainerAccessor)children.get(j);
+						for (GridLayout.ChildContainer childContainer : children) {
+							var chjld = (ChildContainerAccessor) childContainer;
 							if (chjld.getRow() >= insertRow) {
 								chjld.setRow(chjld.getRow() + 1);
 							}

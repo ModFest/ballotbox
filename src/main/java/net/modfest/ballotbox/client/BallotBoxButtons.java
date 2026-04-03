@@ -15,18 +15,20 @@ import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.sounds.Musics;
 import net.minecraft.util.Tuple;
 import net.modfest.ballotbox.BallotBox;
-import net.modfest.ballotbox.BallotBoxConfig;
+import net.modfest.ballotbox.ButtonActionType;
 import net.modfest.ballotbox.packet.OpenVoteScreen;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 
 public class BallotBoxButtons {
-	public static List<Tuple<BallotBoxConfig.ButtonSettings, Function<Screen, Button.Builder>>> createButtons() {
-		var list = new ArrayList<Tuple<BallotBoxConfig.ButtonSettings, Function<Screen, Button.Builder>>>();
+	public static List<Tuple<Map<String, ButtonActionType>, Function<Screen, Button.Builder>>> createButtons() {
+		var list = new ArrayList<Tuple<Map<String, ButtonActionType>, Function<Screen, Button.Builder>>>();
 
-		list.add(new Tuple<>(BallotBox.CONFIG.voting_button, (screen) -> Button.builder(Component.nullToEmpty("Submission Voting"), b -> {
+		list.add(new Tuple<>(BallotBox.CONFIG.voting_button.value(), (screen) -> Button.builder(Component.nullToEmpty("Submission Voting"), b -> {
 			Minecraft.getInstance().setScreen(new VotingScreen());
 			ClientPlayNetworking.send(new OpenVoteScreen());
 		}).tooltip(
@@ -35,10 +37,10 @@ public class BallotBoxButtons {
 				: null
 		)));
 
-		list.add(new Tuple<>(BallotBox.CONFIG.custom_link_button,
+		list.add(new Tuple<>(BallotBox.CONFIG.custom_link_button.value(),
 			(screen) -> Button.builder(Component.nullToEmpty(BallotBox.CONFIG.custom_link_text.value()), ConfirmLinkScreen.confirmLink(screen, BallotBox.CONFIG.custom_link_url.value()))));
 
-		list.add(new Tuple<>(BallotBox.CONFIG.credits_button, (screen) -> Button.builder(Component.nullToEmpty(BallotBox.CONFIG.credits_text.value()), b -> {
+		list.add(new Tuple<>(BallotBox.CONFIG.credits_button.value(), (screen) -> Button.builder(Component.nullToEmpty(BallotBox.CONFIG.credits_text.value()), b -> {
 			Minecraft.getInstance().setScreen(new WinScreen(false, () -> Minecraft.getInstance().setScreen(screen)));
 			Minecraft.getInstance().getMusicManager().stopPlaying();
 			Minecraft.getInstance().getMusicManager().startPlaying(Musics.CREDITS);
@@ -47,14 +49,14 @@ public class BallotBoxButtons {
 		return list;
 	}
 
-	public static boolean match(LayoutElement child, BallotBoxConfig.ButtonSettings settings) {
+	public static String match(LayoutElement child, Set<String> buttons) {
 		if (child instanceof AbstractWidget widget) {
-			if (widget.getMessage().getContents() instanceof TranslatableContents textContent && settings.target_button.value().contains(textContent.getKey())) {
-				return true;
+			if (widget.getMessage().getContents() instanceof TranslatableContents textContent && buttons.contains(textContent.getKey())) {
+				return textContent.getKey();
 			}
 
-			return settings.target_button.value().contains(widget.getMessage().getString());
+			return buttons.contains(widget.getMessage().getString()) ? widget.getMessage().getString() : null;
 		}
-		return false;
+		return null;
 	}
 }
