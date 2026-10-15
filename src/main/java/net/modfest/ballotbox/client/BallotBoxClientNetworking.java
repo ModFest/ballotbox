@@ -20,11 +20,11 @@ public class BallotBoxClientNetworking {
 	}
 
 	private static void handleOpenVoteScreen(OpenVoteScreen packet, ClientPlayNetworking.Context context) {
-		Minecraft.getInstance().setScreen(new VotingScreen());
+		Minecraft.getInstance().setScreenAndShow(new VotingScreen());
 	}
 
 	private static void handleVoteScreenData(S2CVoteScreenData packet, ClientPlayNetworking.Context context) {
-		if (Minecraft.getInstance().screen instanceof VotingScreen vs) {
+		if (Minecraft.getInstance().gui.screen() instanceof VotingScreen vs) {
 			vs.load(packet);
 		}
 	}

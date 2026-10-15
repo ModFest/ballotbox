@@ -50,7 +50,7 @@ public abstract class GameMenuScreenMixin extends Screen {
 
 					if (BallotBoxButtons.match(child, replace) != null) {
 						var button = pair.getB().apply(this).width(child.getWidth()).pos(child.getX(), child.getY()).build();
-						if (settings == BallotBox.CONFIG.voting_button) {
+						if (settings == BallotBox.CONFIG.voting_button.value()) {
 							ballotbox$voteButton = button;
 						}
 

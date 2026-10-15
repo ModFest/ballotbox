@@ -3,6 +3,7 @@ package net.modfest.ballotbox.client;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
+import com.mojang.blaze3d.Blaze3D;
 import dev.lambdaurora.spruceui.Position;
 import dev.lambdaurora.spruceui.background.EmptyBackground;
 import dev.lambdaurora.spruceui.render.SpruceGuiGraphics;
@@ -37,8 +38,8 @@ import net.modfest.ballotbox.packet.C2SUpdateVote;
 import net.modfest.ballotbox.packet.S2CVoteScreenData;
 import net.modfest.ballotbox.util.ModMetaUtil;
 import org.jetbrains.annotations.NotNull;
-import org.lwjgl.glfw.GLFW;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -218,8 +219,8 @@ public class VotingScreen extends SpruceScreen {
 
 		@Override
 		protected boolean onMouseClick(MouseButtonEvent event, boolean doubleClick) {
-			if (event.button() == GLFW.GLFW_MOUSE_BUTTON_2 && url != null) {
-				Util.getPlatform().openUri(url); // confirmation screen causes save
+			if (event.isRight() && url != null) {
+				Blaze3D.openUri(URI.create(url)); // confirmation screen causes save
 				return true;
 			}
 			return super.onMouseClick(event, doubleClick);
@@ -313,7 +314,7 @@ public class VotingScreen extends SpruceScreen {
 			int selected = selections.get(category.id()).size();
 			boolean atLimit = selected >= category.limit();
 			titleText = Component.literal(category.name()).append(Component.literal(" (" + selected + "/" + category.limit() + ")").withStyle(atLimit ? ChatFormatting.GREEN : ChatFormatting.GRAY));
-			buttons.forEach((id, button) -> button.setActive(button.selected || !atLimit));
+			buttons.forEach((_, button) -> button.setActive(button.selected || !atLimit));
 		}
 
 		public void updateProhibitions(String optionId, boolean selected) {

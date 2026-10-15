@@ -14,7 +14,7 @@ import net.modfest.ballotbox.packet.OpenVoteScreen;
 
 public class BallotBoxKeybinds {
 	public static final KeyMapping.Category BALLOTBOX_CATEGORY = KeyMapping.Category.register(Identifier.fromNamespaceAndPath(BallotBox.ID, "ballotbox"));
-	public static final KeyMapping OPEN_VOTING_SCREEN = new KeyMapping("key.ballotbox.open", InputConstants.Type.KEYSYM, InputConstants.KEY_APOSTROPHE, BALLOTBOX_CATEGORY);
+	public static final KeyMapping OPEN_VOTING_SCREEN = new KeyMapping("key.ballotbox.open", InputConstants.Type.KEYBOARD, InputConstants.KEY_APOSTROPHE, BALLOTBOX_CATEGORY);
 
 	public static void init() {
 		KeyMappingHelper.registerKeyMapping(OPEN_VOTING_SCREEN);
@@ -24,9 +24,9 @@ public class BallotBoxKeybinds {
 	private static void tick(Minecraft client) {
 		while (OPEN_VOTING_SCREEN.consumeClick() && BallotBoxClient.isEnabled(client)) {
 			if (!BallotBoxClient.isOpen()) {
-				client.gui.setOverlayMessage(Component.literal("[BallotBox] ").withStyle(ChatFormatting.GREEN).append(Component.literal("Voting is unavailable! Voting closed %s.".formatted(BallotBox.relativeTime(BallotBoxClient.closingTime))).withStyle(ChatFormatting.RED)), false);
-			} else if (client.screen == null) {
-				client.setScreen(new VotingScreen());
+				client.gui.hud.setOverlayMessage(Component.literal("[BallotBox] ").withStyle(ChatFormatting.GREEN).append(Component.literal("Voting is unavailable! Voting closed %s.".formatted(BallotBox.relativeTime(BallotBoxClient.closingTime))).withStyle(ChatFormatting.RED)), false);
+			} else if (client.gui.screen() == null) {
+				client.setScreenAndShow(new VotingScreen());
 				ClientPlayNetworking.send(new OpenVoteScreen());
 			}
 		}
